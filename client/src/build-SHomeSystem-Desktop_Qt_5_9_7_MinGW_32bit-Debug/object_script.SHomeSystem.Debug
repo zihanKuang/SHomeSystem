@@ -7,7 +7,7 @@ INPUT(
 ./debug\environmentwidget.o
 ./debug\registerview.o
 ./debug\loginview.o
-./debug\userdb.o
+./debug\sensormodule.o
 ./debug\moc_widget.o
 ./debug\moc_weatherwidget.o
 ./debug\moc_tabwidget.o
@@ -15,4 +15,5 @@ INPUT(
 ./debug\moc_environmentwidget.o
 ./debug\moc_registerview.o
 ./debug\moc_loginview.o
+./debug\moc_sensormodule.o
 );

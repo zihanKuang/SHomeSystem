@@ -7,7 +7,7 @@ INPUT(
 ./release\environmentwidget.o
 ./release\registerview.o
 ./release\loginview.o
-./release\userdb.o
+./release\sensormodule.o
 ./release\moc_widget.o
 ./release\moc_weatherwidget.o
 ./release\moc_tabwidget.o
@@ -15,4 +15,5 @@ INPUT(
 ./release\moc_environmentwidget.o
 ./release\moc_registerview.o
 ./release\moc_loginview.o
+./release\moc_sensormodule.o
 );

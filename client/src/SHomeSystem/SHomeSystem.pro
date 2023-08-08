@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts sql
+QT       += core gui charts sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -33,7 +33,7 @@ SOURCES += \
     environmentwidget.cpp \
     registerview.cpp \
     loginview.cpp \
-    userdb.cpp
+    sensormodule.cpp
 
 HEADERS += \
         widget.h \
@@ -43,7 +43,8 @@ HEADERS += \
     environmentwidget.h \
     registerview.h \
     loginview.h \
-    userdb.h
+    userdb.h \
+    sensormodule.h
 
 FORMS += \
         widget.ui \

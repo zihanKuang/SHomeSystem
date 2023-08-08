@@ -1,24 +1,25 @@
 #ifndef SENSORMODULE_H
 #define SENSORMODULE_H
 
-#include <QAbstractListModel>
+#include <QObject>
 
-class SensorModule : public QAbstractListModel
+class SensorModule : public QObject
 {
     Q_OBJECT
-
 public:
     explicit SensorModule(QObject *parent = nullptr);
 
-    // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-    // Basic functionality:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    void collectTemperatureData();
+    void collectHumidityData();
+    void collectBrightnessData();
 
 private:
+    double generateRandomDouble(double min, double max);
+    double readTemperatureSensor();
+    double readHumiditySensor();
+    double readBrightnessSensor();
+    double convertToDigital(double analogData);
+    void sendDataToServer(double temperature, double humidity, double brightness);
 };
 
 #endif // SENSORMODULE_H

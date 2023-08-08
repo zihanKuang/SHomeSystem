@@ -2,6 +2,7 @@
 #include "ui_registerview.h"
 #include <QtDebug>
 #include <QMessageBox>
+#include <QtNetwork>
 
 RegisterView::RegisterView(QWidget *parent) :
     QWidget(parent),
@@ -79,13 +80,39 @@ void RegisterView::onRegisterButtonClicked()
     callRegisterAPI();
 }
 
+// 在客户端中调用UserDB的saveUser()函数
 void RegisterView::callRegisterAPI()
 {
-    // 调用后端注册接口的逻辑
-    // 实际调用后端注册接口的代码，并处理后端的响应
-
     QString name = ui->nameEdit->text().trimmed();
     QString password = ui->pwdEdit->text();
 
-    qDebug() << "Registering user with name: " << name << " and password: " << password;
+    // 创建QNetworkAccessManager对象
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+
+    // 构建HTTP请求
+    QNetworkRequest request(QUrl("http://your_server_url/user/register"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    // 构建请求参数
+    QByteArray postData;
+    postData.append("username=" + name);
+    postData.append("&password=" + password);
+
+    // 发送HTTP POST请求
+    QNetworkReply *reply = manager->post(request, postData);
+
+    // 连接信号和槽，处理服务器的响应
+    connect(reply, &QNetworkReply::finished, this, [reply]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            // 请求成功，解析服务器响应的JSON数据并进行处理
+            QByteArray responseData = reply->readAll();
+            // 解析JSON数据并处理
+            // 例如检查注册是否成功，弹出相应的提示框等
+        } else {
+            // 请求失败
+            qDebug() << "Registration failed:" << reply->errorString();
+        }
+        reply->deleteLater();
+    });
 }
+
