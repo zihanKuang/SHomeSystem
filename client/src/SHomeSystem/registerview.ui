@@ -95,6 +95,19 @@
     </rect>
    </property>
   </widget>
+  <widget class="QLabel" name="title">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>10</y>
+     <width>41</width>
+     <height>9</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>注册页面</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

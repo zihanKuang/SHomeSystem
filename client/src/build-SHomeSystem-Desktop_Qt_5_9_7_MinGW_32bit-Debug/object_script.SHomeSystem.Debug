@@ -8,6 +8,9 @@ INPUT(
 ./debug\registerview.o
 ./debug\loginview.o
 ./debug\sensormodule.o
+./debug\automaticcontrol.o
+./debug\executor.o
+./debug\device.o
 ./debug\moc_widget.o
 ./debug\moc_weatherwidget.o
 ./debug\moc_tabwidget.o

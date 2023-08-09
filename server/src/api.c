@@ -4,6 +4,9 @@
 #include "db.h"  // 包含数据惯例模块的头文件
 #include <stdio.h>
 #include <string.h>
+#include "cJSON.h"
+
+const int MAX_REQUEST_SIZE = 1024;
 
 // 处理客户端HTTP请求
 void handleRequest(const char* request)
@@ -40,10 +43,10 @@ void handleRequest(const char* request)
 bool validateUser(const char* username, const char* password)
 {
     // 从数据库中获取用户信息
-    char storedPassword[256];
-    bool userExists = getUserData(username, storedPassword);
+    char db_pass[32];
+    bool userExists = getUserData(username, db_pass);
 
-    if (userExists && strcmp(storedPassword, password) == 0)
+    if (userExists && strcmp(db_pass, password) == 0)
     {
         // 用户存在且密码匹配，验证通过
         return true;
@@ -58,7 +61,6 @@ const char* serializeToJson(const void* object)
 {
     // 实现将对象数据序列化为JSON格式的逻辑
     // 返回JSON格式的字符串
-    // 这里只是示例，具体实现根据你的数据结构进行
     return "{}";
 }
 
@@ -67,7 +69,6 @@ void* deserializeFromJson(const char* json, size_t size)
 {
     // 实现将JSON反序列化为对象的逻辑
     // 返回对象指针
-    // 这里只是示例，具体实现根据你的数据结构进行
     return NULL;
 }
 
@@ -75,41 +76,67 @@ void* deserializeFromJson(const char* json, size_t size)
 void handleException(const char* message)
 {
     // 处理网络错误等异常情况的逻辑
-    // 这里只是示例，可以根据具体情况进行处理
     printf("Exception occurred: %s\n", message);
 }
 
-// 处理用户注册请求与信息验证
-void handleUserRegistration(const char* request)
-{
-    // 解析客户端请求，获取用户名和密码等信息
-    // 从request中提取用户名和密码等字段
+/// 处理用户注册请求与信息验证
+void handleUserRegister(char* request) {
 
-    // 调用数据惯例模块中的函数，保存用户信息到数据库
-    // 调用saveUserData()函数将用户信息保存到数据库
+  // 从请求JSON解析用户名密码
+  cJSON* json = cJSON_Parse(request);
+  
+  char* username = cJSON_GetObjectItem(json, "username")->valuestring;
+  char* password = cJSON_GetObjectItem(json, "password")->valuestring;
 
-    // 返回注册成功响应
-    // 返回客户端JSON格式的注册成功响应
+  // 保存到数据库
+  saveUser(username, password);
+  
+  // 返回响应
+  cJSON* resp = cJSON_CreateObject();
+  cJSON_AddBoolToObject(resp, "success", 1);
+  char* resp_str = cJSON_Print(resp);
+
+  sendHttpResp(200, "application/json", resp_str);
+  
+  cJSON_Delete(resp); // 清楚object
+        free(resp_str);
+        cJSON_Delete(json);
+    } else {
+        handleException("JSON parsing error");
+    }
 }
 
 // 处理用户登录请求与验证
 void handleUserLogin(const char* request)
 {
-    // 解析客户端请求，获取用户名和密码等信息
-    // 从request中提取用户名和密码等字段
+	cJSON* json = cJSON_Parse(request);
+	
+     if (json) {
+        char* username = cJSON_GetObjectItem(json, "username")->valuestring;
+        char* password = cJSON_GetObjectItem(json, "password")->valuestring;
 
-    // 调用validateUser()函数验证用户身份
-    bool isValidUser = validateUser(username, password);
+        bool isValidUser = validateUser(username, password);
 
-    if (isValidUser)
-    {
-        // 用户验证通过，返回登录成功响应
-        // 返回客户端JSON格式的登录成功响应
-    }
-    else
-    {
-        // 用户验证失败，返回登录失败响应
-        // 返回客户端JSON格式的登录失败响应
+        cJSON* response = cJSON_CreateObject();
+
+        if (isValidUser) {
+            cJSON_AddBoolToObject(response, "success", 1);
+            // Add other relevant data to the response JSON
+        } else {
+            cJSON_AddBoolToObject(response, "success", 0);
+            // Add other relevant data to the response JSON
+        }
+
+        char* response_str = cJSON_Print(response);
+
+        sendHttpResp(200, "application/json", response_str);
+
+        cJSON_Delete(response);
+        free(response_str);
+        cJSON_Delete(json);
+    } else {
+        // Handle JSON parsing error
+        handleException("JSON parsing error");
     }
 }
 
@@ -128,16 +155,24 @@ void handleDeviceControl(const char* request)
 }
 
 // 分析用户数据,生成统计报告
-void analyzeUserData(const char* request)
-{
-    // 解析客户端请求，获取分析用户数据的参数
-    // 从request中提取分析参数等字段
+void analyzeSensorData() {
 
-    // 调用数据惯例模块中的函数，获取用户数据并进行分析
-    // 调用getUserData()函数从数据库中获取用户数据
+  // 1. 从数据库获取温湿度数据
+  char* sql = "SELECT * FROM EnvironmentData";
+  queryDataFromDB(sql);
 
-    // 生成统计报告
+  // 2. 统计分析,生成温湿度折线图数据
+  double temp_data[100];
+  double humid_data[100];
 
-    // 返回统计报告响应
-    // 返回客户端JSON格式的统计报告响应
+  // 3. 生成柱状图数据
+  int energy_data[5];
+  int runtime_data[5];
+
+  // 4. 将统计结果序列化为JSON
+  cJSON* analysis = generateResultJson(temp_data, humid_data, energy_data, runtime_data);
+
+  // 5. 返回给客户端 
+  sendHttpResp(200, "application/json", analysis);
+
 }

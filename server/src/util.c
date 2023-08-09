@@ -16,3 +16,23 @@ char* to_json(const User* u) {
 	// ...
 	return cJSON_Print(root);
 }
+
+// 设备故障检测
+void checkDeviceFailure() {
+  // 分析日志、监控数据
+  // 检测故障 
+  // 触发警报
+}
+
+// 温度异常检测
+void checkTempAnomaly() {
+  // 获取温度数据
+  // 分析判断是否异常
+  // 触发警报
+}
+
+// 发送警报
+void sendAlert(User* user, Alert* alert) {
+  // 调用通知模块接口
+  // 发送警报
+}

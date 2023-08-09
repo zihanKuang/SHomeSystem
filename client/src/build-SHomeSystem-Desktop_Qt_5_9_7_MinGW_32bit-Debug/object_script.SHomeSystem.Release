@@ -8,6 +8,9 @@ INPUT(
 ./release\registerview.o
 ./release\loginview.o
 ./release\sensormodule.o
+./release\automaticcontrol.o
+./release\executor.o
+./release\device.o
 ./release\moc_widget.o
 ./release\moc_weatherwidget.o
 ./release\moc_tabwidget.o

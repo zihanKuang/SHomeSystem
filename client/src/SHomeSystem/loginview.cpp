@@ -43,7 +43,7 @@ void LoginView::callLoginAPI(const QString& username, const QString& password)
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 
     // 构建HTTP请求
-    QNetworkRequest request(QUrl("http://your_server_url/user/login"));
+    QNetworkRequest request(QUrl("http://127.0.0.1:8080/user/login"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     // 构建请求参数

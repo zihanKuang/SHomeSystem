@@ -33,7 +33,10 @@ SOURCES += \
     environmentwidget.cpp \
     registerview.cpp \
     loginview.cpp \
-    sensormodule.cpp
+    sensormodule.cpp \
+    automaticcontrol.cpp \
+    executor.cpp \
+    device.cpp
 
 HEADERS += \
         widget.h \
@@ -44,7 +47,10 @@ HEADERS += \
     registerview.h \
     loginview.h \
     userdb.h \
-    sensormodule.h
+    sensormodule.h \
+    automaticcontrol.h \
+    executor.h \
+    device.h
 
 FORMS += \
         widget.ui \
