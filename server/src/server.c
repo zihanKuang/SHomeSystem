@@ -8,11 +8,42 @@ socket创建
 
 // 引入libevent头文件
 #include <event2/event.h>
+#include "api.c" 
+#include "db.c"
 
-void handle_request(struct evhttp_request* req, void* arg) {
-    // 获取请求路径，根据路由表选择处理函数
-    // 执行处理函数，获取响应数据
-    // 发送响应数据给客户端
+// 处理客户端HTTP请求
+void handleRequest(const char* request)
+{
+    // 解析客户端请求，根据路由选择对应的处理函数
+    if (strncmp(request, "/user/register", strlen("/user/register")) == 0)
+    {
+        // 处理用户注册请求
+        handleUserRegistration(request);
+    }
+    else if (strncmp(request, "/user/login", strlen("/user/login")) == 0)
+    {
+        // 处理用户登录请求
+        handleUserLogin(request);
+    }
+    else if (strncmp(request, "/device/control", strlen("/device/control")) == 0)
+    {
+        // 处理设备控制请求
+        handleDeviceControl(request);
+    }
+    else if (strncmp(request, "/user/data/analyze", strlen("/user/data/analyze")) == 0)
+    {
+        // 处理用户数据分析请求
+        analyzeUserData(request);
+    }
+	else if (strncmp(request, "/weather", strlen("/weather")) == 0) {
+        // 处理获取天气数据请求
+        handleWeatherRequest();
+    }
+    else
+    {
+        // 请求路径不合法，返回错误响应
+        handleException("Invalid request");
+    }
 }
 
 void start_server() {
@@ -21,7 +52,7 @@ void start_server() {
 
     // 创建HTTP server
     struct evhttp* http_server = evhttp_new(base);
-    evhttp_bind_socket(http_server, "0.0.0.0", 8000);
+    evhttp_bind_socket(http_server, "0.0.0.0", 8080);
 
     // 设置请求处理函数
     evhttp_set_gencb(http_server, handle_request, NULL);

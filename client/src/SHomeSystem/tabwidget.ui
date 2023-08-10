@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>90</y>
+     <y>0</y>
      <width>731</width>
-     <height>501</height>
+     <height>591</height>
     </rect>
    </property>
    <property name="tabPosition">
@@ -41,7 +41,7 @@
        <height>171</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="airTitle">
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
@@ -95,9 +95,9 @@
        <height>22</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="airName">
       <item>
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="livingAir">
         <property name="text">
          <string>客厅空调</string>
         </property>
@@ -117,7 +117,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="hostAir">
         <property name="text">
          <string>主卧空调</string>
         </property>
@@ -137,7 +137,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="secondAir">
         <property name="text">
          <string>次卧空调</string>
         </property>
@@ -154,9 +154,9 @@
        <height>31</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="airLcd">
       <item>
-       <widget class="QLCDNumber" name="lcdNumber"/>
+       <widget class="QLineEdit" name="livingAirEdit"/>
       </item>
       <item>
        <spacer name="horizontalSpacer">
@@ -172,7 +172,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLCDNumber" name="lcdNumber_2"/>
+       <widget class="QLineEdit" name="hostAirEdit"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_2">
@@ -188,7 +188,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLCDNumber" name="lcdNumber_3"/>
+       <widget class="QLineEdit" name="secondAirEdit"/>
       </item>
      </layout>
     </widget>
@@ -198,16 +198,12 @@
        <x>100</x>
        <y>130</y>
        <width>591</width>
-       <height>22</height>
+       <height>24</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <layout class="QHBoxLayout" name="airMode">
       <item>
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="livingAirMode"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_3">
@@ -223,11 +219,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="hostAirMode"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_4">
@@ -243,11 +235,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="secondAirMode"/>
       </item>
      </layout>
     </widget>
@@ -260,9 +248,9 @@
        <height>31</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <layout class="QHBoxLayout" name="airAuto">
       <item>
-       <widget class="QTimeEdit" name="timeEdit"/>
+       <widget class="QTimeEdit" name="livingAirTime"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_5">
@@ -278,7 +266,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QTimeEdit" name="timeEdit_2"/>
+       <widget class="QTimeEdit" name="hostAirTime"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_6">
@@ -294,7 +282,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QTimeEdit" name="timeEdit_3"/>
+       <widget class="QTimeEdit" name="secondAirTime"/>
       </item>
      </layout>
     </widget>
@@ -307,9 +295,9 @@
        <height>22</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <layout class="QHBoxLayout" name="airBtn">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="livingAirBtn">
         <property name="text">
          <string>PushButton</string>
         </property>
@@ -329,7 +317,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="hostAirBtn">
         <property name="text">
          <string>PushButton</string>
         </property>
@@ -349,7 +337,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="secondAirBtn">
         <property name="text">
          <string>PushButton</string>
         </property>
@@ -366,9 +354,9 @@
        <height>31</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_8">
+     <layout class="QHBoxLayout" name="lightAuto">
       <item>
-       <widget class="QTimeEdit" name="timeEdit_4"/>
+       <widget class="QTimeEdit" name="livingLightAuto"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_15">
@@ -384,7 +372,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QTimeEdit" name="timeEdit_5"/>
+       <widget class="QTimeEdit" name="hostLightAuto"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_16">
@@ -400,11 +388,11 @@
        </spacer>
       </item>
       <item>
-       <widget class="QTimeEdit" name="timeEdit_6"/>
+       <widget class="QTimeEdit" name="secondLightAuto"/>
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -413,7 +401,7 @@
        <height>121</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="lightTitle">
       <item>
        <widget class="QLabel" name="label_5">
         <property name="text">
@@ -444,7 +432,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -453,9 +441,9 @@
        <height>24</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <layout class="QHBoxLayout" name="lightMode">
       <item>
-       <widget class="QComboBox" name="comboBox"/>
+       <widget class="QComboBox" name="livingLightMode"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_13">
@@ -471,7 +459,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox_2"/>
+       <widget class="QComboBox" name="hostLightMode"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_14">
@@ -487,11 +475,11 @@
        </spacer>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox_3"/>
+       <widget class="QComboBox" name="secondLightMode"/>
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -500,7 +488,7 @@
        <height>22</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <layout class="QHBoxLayout" name="lightName">
       <item>
        <widget class="QLabel" name="label_6">
         <property name="text">
@@ -550,7 +538,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -559,7 +547,7 @@
        <height>131</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
+     <layout class="QVBoxLayout" name="humidityTitle">
       <item>
        <widget class="QLabel" name="label_9">
         <property name="text">
@@ -583,28 +571,28 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>100</x>
        <y>400</y>
        <width>361</width>
-       <height>20</height>
+       <height>25</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_9">
+     <layout class="QHBoxLayout" name="livingHumidity">
       <item>
-       <widget class="QSlider" name="horizontalSlider">
+       <widget class="QSlider" name="livingHumiditySlider">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLCDNumber" name="lcdNumber_4"/>
+       <widget class="QSpinBox" name="spinBox"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="livingHumidityBtn">
         <property name="text">
          <string>PushButton</string>
         </property>
@@ -612,28 +600,28 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>100</x>
        <y>440</y>
        <width>361</width>
-       <height>21</height>
+       <height>25</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_10">
+     <layout class="QHBoxLayout" name="hostHumidity">
       <item>
-       <widget class="QSlider" name="horizontalSlider_2">
+       <widget class="QSlider" name="hostHumiditySlider">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLCDNumber" name="lcdNumber_5"/>
+       <widget class="QSpinBox" name="spinBox_2"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="hostHumidityBtn">
         <property name="text">
          <string>PushButton</string>
         </property>

@@ -29,6 +29,7 @@ public:
     QLineEdit *nameEdit;
     QLineEdit *pwdEdit;
     QPushButton *loginButton;
+    QLabel *title;
 
     void setupUi(QWidget *LoginView)
     {
@@ -37,19 +38,22 @@ public:
         LoginView->resize(223, 119);
         nameLabel = new QLabel(LoginView);
         nameLabel->setObjectName(QStringLiteral("nameLabel"));
-        nameLabel->setGeometry(QRect(30, 20, 41, 9));
+        nameLabel->setGeometry(QRect(30, 30, 41, 9));
         pwdLabel = new QLabel(LoginView);
         pwdLabel->setObjectName(QStringLiteral("pwdLabel"));
-        pwdLabel->setGeometry(QRect(30, 49, 41, 20));
+        pwdLabel->setGeometry(QRect(30, 59, 41, 20));
         nameEdit = new QLineEdit(LoginView);
         nameEdit->setObjectName(QStringLiteral("nameEdit"));
-        nameEdit->setGeometry(QRect(80, 20, 113, 20));
+        nameEdit->setGeometry(QRect(80, 30, 113, 20));
         pwdEdit = new QLineEdit(LoginView);
         pwdEdit->setObjectName(QStringLiteral("pwdEdit"));
-        pwdEdit->setGeometry(QRect(80, 50, 113, 20));
+        pwdEdit->setGeometry(QRect(80, 60, 113, 20));
         loginButton = new QPushButton(LoginView);
         loginButton->setObjectName(QStringLiteral("loginButton"));
         loginButton->setGeometry(QRect(70, 90, 80, 15));
+        title = new QLabel(LoginView);
+        title->setObjectName(QStringLiteral("title"));
+        title->setGeometry(QRect(90, 10, 41, 9));
 
         retranslateUi(LoginView);
 
@@ -62,6 +66,7 @@ public:
         nameLabel->setText(QApplication::translate("LoginView", "\347\224\250\346\210\267\345\220\215\357\274\232", Q_NULLPTR));
         pwdLabel->setText(QApplication::translate("LoginView", "\345\257\206\347\240\201\357\274\232", Q_NULLPTR));
         loginButton->setText(QApplication::translate("LoginView", "\347\231\273\345\275\225", Q_NULLPTR));
+        title->setText(QApplication::translate("LoginView", "\347\231\273\345\275\225\351\241\265\351\235\242", Q_NULLPTR));
     } // retranslateUi
 
 };

@@ -3,11 +3,17 @@
 
 class Device {
 public:
-    enum class State { Off, On };
+    enum class State { On, Off };//目前开还是关
+    enum class TimerType { On, Off };//定时开还是关
 
     //virtual ~Device() {} //虚析构函数
     void turnOn();
     void turnOff();
+    //状态设置
+    State getState() const;
+    void setState(State state);
+    //控制开关
+    void togglePower();
 
 protected:
     State state = State::Off;
@@ -17,21 +23,31 @@ protected:
 class AirConditioner : public Device {
 public:
 
-    enum class Mode { Heating, Cooling };
-    enum class Function { Dehumidification, EnergySaving, Quiet };
-
+    //制冷，制热，除湿，节能，睡眠，送风
+    enum class Mode { Heating, Cooling , Dehumidification, EnergySaving, Quiet, AirSupply };
     // 设置模式
     void setMode(Mode mode);
-    // 设置功能
-    void setFunction(Function func);
+    // 设置温度
+    void setTemperature(double temperature);
     // 设置定时
-    void setTimer(int hours);
+    void setTimer(int hours, int minutes, TimerType timerType);
+    // 设置定时-小时
+    void setTimerHours(int hours);
+    int getTimerHours() const;
+    // 设置定时-分钟
+    void setTimerMinutes(int minutes);
+    int getTimerMinutes() const;
+    // 设置定时状态
+    void setTimerType(TimerType type);
 
 private:
-    //State state= State::Off;
     Mode mode;
-    Function function;
     int timer;
+    double temperature;
+
+    int timerHours;
+    int timerMinutes;
+    TimerType timerType;
 };
 
 class Humidifier : public Device {

@@ -15,24 +15,26 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QWidget>
+#include "tabwidget.h"
+#include "weatherwidget.h"
 
 QT_BEGIN_NAMESPACE
 
 class Ui_Widget
 {
 public:
-    QWidget *tabwidget;
-    QWidget *weatherwidget;
+    TabWidget *tabwidget;
+    WeatherWidget *weatherwidget;
 
     void setupUi(QWidget *Widget)
     {
         if (Widget->objectName().isEmpty())
             Widget->setObjectName(QStringLiteral("Widget"));
         Widget->resize(818, 597);
-        tabwidget = new QWidget(Widget);
+        tabwidget = new TabWidget(Widget);
         tabwidget->setObjectName(QStringLiteral("tabwidget"));
-        tabwidget->setGeometry(QRect(10, 100, 711, 481));
-        weatherwidget = new QWidget(Widget);
+        tabwidget->setGeometry(QRect(10, 100, 741, 481));
+        weatherwidget = new WeatherWidget(Widget);
         weatherwidget->setObjectName(QStringLiteral("weatherwidget"));
         weatherwidget->setGeometry(QRect(10, 10, 711, 81));
 

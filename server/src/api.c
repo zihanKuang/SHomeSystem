@@ -8,37 +8,6 @@
 
 const int MAX_REQUEST_SIZE = 1024;
 
-// 处理客户端HTTP请求
-void handleRequest(const char* request)
-{
-    // 解析客户端请求，根据路由选择对应的处理函数
-    if (strncmp(request, "/user/register", strlen("/user/register")) == 0)
-    {
-        // 处理用户注册请求
-        handleUserRegistration(request);
-    }
-    else if (strncmp(request, "/user/login", strlen("/user/login")) == 0)
-    {
-        // 处理用户登录请求
-        handleUserLogin(request);
-    }
-    else if (strncmp(request, "/device/control", strlen("/device/control")) == 0)
-    {
-        // 处理设备控制请求
-        handleDeviceControl(request);
-    }
-    else if (strncmp(request, "/user/data/analyze", strlen("/user/data/analyze")) == 0)
-    {
-        // 处理用户数据分析请求
-        analyzeUserData(request);
-    }
-    else
-    {
-        // 请求路径不合法，返回错误响应
-        handleException("Invalid request");
-    }
-}
-
 // 验证用户身份是否合法
 bool validateUser(const char* username, const char* password)
 {
@@ -176,3 +145,73 @@ void analyzeSensorData() {
   sendHttpResp(200, "application/json", analysis);
 
 }
+
+// 获取天气数据
+const char* fetchWeatherData() {
+    // 使用网络库获取天气数据，可以调用外部 API
+    // 使用高德地图天气API获取天气数据
+    const char* url = "https://restapi.amap.com/v3/weather/weatherInfo";
+    const char* key = "f8129a5e0cac5b3982285cbc817f9a91";
+    const char* city = "武汉"; // 需要查询的城市
+
+    // 构建请求URL
+    char requestUrl[1024];
+    snprintf(requestUrl, sizeof(requestUrl), "%s?city=%s&key=%s", url, city, key);
+
+    // 使用网络库发送GET请求，获取天气数据
+
+    // 示例数据
+    const char* weatherData = "{\"temperature\": 25, \"humidity\": 60}";
+
+    return weatherData;
+}
+
+// 处理获取天气数据请求
+void handleWeatherRequest(evhttp_request* req, void* arg) {
+    const char* weather_data = fetchWeatherData();
+
+    // 构造响应
+    struct evbuffer* buf = evbuffer_new();
+
+    if (!buf) {
+        sendHttpError(req, 500);
+        return;
+    }
+
+    evbuffer_add_printf(buf, "%s", weather_data);
+
+    // 设置响应代码和类型
+    struct evkeyvalq* headers = evhttp_request_get_output_headers(req);
+    evhttp_add_header(headers, "Content-Type", "application/json");
+    evhttp_send_reply(req, HTTP_OK, "OK", buf);
+
+    // 清理
+    evbuffer_free(buf);
+}
+
+// 发送HTTP错误响应
+void sendHttpError(evhttp_request* req, int error_code) {
+    const char* error_message = get_error_message(error_code);
+
+    struct evbuffer* buf = evbuffer_new();
+
+    if (!buf) {
+        // 处理 allocation failure
+        return;
+    }
+
+    evbuffer_add_printf(buf, "%s", error_message);
+
+    struct evkeyvalq* headers = evhttp_request_get_output_headers(req);
+    evhttp_add_header(headers, "Content-Type", "text/plain");
+    evhttp_send_reply(req, error_code, error_message, buf);
+
+    evbuffer_free(buf);
+}
+
+
+
+
+
+
+

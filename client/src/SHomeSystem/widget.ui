@@ -13,17 +13,17 @@
   <property name="windowTitle">
    <string>Widget</string>
   </property>
-  <widget class="QWidget" name="tabwidget" native="true">
+  <widget class="TabWidget" name="tabwidget" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>100</y>
-     <width>711</width>
+     <width>741</width>
      <height>481</height>
     </rect>
    </property>
   </widget>
-  <widget class="QWidget" name="weatherwidget" native="true">
+  <widget class="WeatherWidget" name="weatherwidget" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -35,6 +35,20 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>TabWidget</class>
+   <extends>QWidget</extends>
+   <header>tabwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WeatherWidget</class>
+   <extends>QWidget</extends>
+   <header>weatherwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

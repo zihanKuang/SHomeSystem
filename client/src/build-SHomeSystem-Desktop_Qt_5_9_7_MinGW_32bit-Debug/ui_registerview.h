@@ -31,6 +31,7 @@ public:
     QPushButton *registerButton;
     QLabel *rePwdLable;
     QLineEdit *rePwdEdit;
+    QLabel *title;
 
     void setupUi(QWidget *RegisterView)
     {
@@ -58,6 +59,9 @@ public:
         rePwdEdit = new QLineEdit(RegisterView);
         rePwdEdit->setObjectName(QStringLiteral("rePwdEdit"));
         rePwdEdit->setGeometry(QRect(80, 90, 113, 20));
+        title = new QLabel(RegisterView);
+        title->setObjectName(QStringLiteral("title"));
+        title->setGeometry(QRect(80, 10, 41, 9));
 
         retranslateUi(RegisterView);
 
@@ -71,6 +75,7 @@ public:
         pwdLable->setText(QApplication::translate("RegisterView", "\345\257\206\347\240\201\357\274\232", Q_NULLPTR));
         registerButton->setText(QApplication::translate("RegisterView", "\346\263\250\345\206\214", Q_NULLPTR));
         rePwdLable->setText(QApplication::translate("RegisterView", "\347\241\256\350\256\244\345\257\206\347\240\201\357\274\232", Q_NULLPTR));
+        title->setText(QApplication::translate("RegisterView", "\346\263\250\345\206\214\351\241\265\351\235\242", Q_NULLPTR));
     } // retranslateUi
 
 };

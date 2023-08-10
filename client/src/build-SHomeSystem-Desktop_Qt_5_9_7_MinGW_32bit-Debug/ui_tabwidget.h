@@ -16,11 +16,12 @@
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLCDNumber>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QSpacerItem>
+#include <QtWidgets/QSpinBox>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTimeEdit>
 #include <QtWidgets/QVBoxLayout>
@@ -35,25 +36,8 @@ class Ui_TabWidget
 public:
     QTabWidget *tabWidget;
     QWidget *FurnitureOverviewPage;
-    QLabel *label_5;
-    QLabel *label_6;
-    QLabel *label_7;
-    QLabel *label_8;
-    QLabel *label_9;
-    QLabel *label_10;
-    QLabel *label_11;
-    QLabel *label_19;
-    QComboBox *comboBox;
-    QComboBox *comboBox_2;
-    QComboBox *comboBox_3;
-    QSlider *horizontalSlider;
-    QSlider *horizontalSlider_2;
-    QPushButton *pushButton_4;
-    QPushButton *pushButton_5;
-    QLCDNumber *lcdNumber_4;
-    QLCDNumber *lcdNumber_5;
     QWidget *layoutWidget;
-    QVBoxLayout *verticalLayout;
+    QVBoxLayout *airTitle;
     QLabel *label;
     QLabel *label_15;
     QLabel *label_20;
@@ -61,40 +45,82 @@ public:
     QLabel *label_17;
     QLabel *label_18;
     QWidget *layoutWidget1;
-    QHBoxLayout *horizontalLayout;
-    QLabel *label_2;
+    QHBoxLayout *airName;
+    QLabel *livingAir;
     QSpacerItem *horizontalSpacer_7;
-    QLabel *label_3;
+    QLabel *hostAir;
     QSpacerItem *horizontalSpacer_8;
-    QLabel *label_4;
+    QLabel *secondAir;
     QWidget *layoutWidget2;
-    QHBoxLayout *horizontalLayout_2;
-    QLCDNumber *lcdNumber;
+    QHBoxLayout *airLcd;
+    QLineEdit *livingAirEdit;
     QSpacerItem *horizontalSpacer;
-    QLCDNumber *lcdNumber_2;
+    QLineEdit *hostAirEdit;
     QSpacerItem *horizontalSpacer_2;
-    QLCDNumber *lcdNumber_3;
+    QLineEdit *secondAirEdit;
     QWidget *layoutWidget3;
-    QHBoxLayout *horizontalLayout_3;
-    QLabel *label_12;
+    QHBoxLayout *airMode;
+    QComboBox *livingAirMode;
     QSpacerItem *horizontalSpacer_3;
-    QLabel *label_13;
+    QComboBox *hostAirMode;
     QSpacerItem *horizontalSpacer_4;
-    QLabel *label_14;
+    QComboBox *secondAirMode;
     QWidget *layoutWidget4;
-    QHBoxLayout *horizontalLayout_4;
-    QTimeEdit *timeEdit;
+    QHBoxLayout *airAuto;
+    QTimeEdit *livingAirTime;
     QSpacerItem *horizontalSpacer_5;
-    QTimeEdit *timeEdit_2;
+    QTimeEdit *hostAirTime;
     QSpacerItem *horizontalSpacer_6;
-    QTimeEdit *timeEdit_3;
+    QTimeEdit *secondAirTime;
     QWidget *layoutWidget5;
-    QHBoxLayout *horizontalLayout_5;
-    QPushButton *pushButton;
+    QHBoxLayout *airBtn;
+    QPushButton *livingAirBtn;
     QSpacerItem *horizontalSpacer_9;
-    QPushButton *pushButton_2;
+    QPushButton *hostAirBtn;
     QSpacerItem *horizontalSpacer_10;
-    QPushButton *pushButton_3;
+    QPushButton *secondAirBtn;
+    QWidget *layoutWidget_2;
+    QHBoxLayout *lightAuto;
+    QTimeEdit *livingLightAuto;
+    QSpacerItem *horizontalSpacer_15;
+    QTimeEdit *hostLightAuto;
+    QSpacerItem *horizontalSpacer_16;
+    QTimeEdit *secondLightAuto;
+    QWidget *layoutWidget6;
+    QVBoxLayout *lightTitle;
+    QLabel *label_5;
+    QLabel *label_21;
+    QLabel *label_19;
+    QLabel *label_22;
+    QWidget *layoutWidget7;
+    QHBoxLayout *lightMode;
+    QComboBox *livingLightMode;
+    QSpacerItem *horizontalSpacer_13;
+    QComboBox *hostLightMode;
+    QSpacerItem *horizontalSpacer_14;
+    QComboBox *secondLightMode;
+    QWidget *layoutWidget8;
+    QHBoxLayout *lightName;
+    QLabel *label_6;
+    QSpacerItem *horizontalSpacer_11;
+    QLabel *label_7;
+    QSpacerItem *horizontalSpacer_12;
+    QLabel *label_8;
+    QWidget *layoutWidget9;
+    QVBoxLayout *humidityTitle;
+    QLabel *label_9;
+    QLabel *label_10;
+    QLabel *label_11;
+    QWidget *layoutWidget10;
+    QHBoxLayout *livingHumidity;
+    QSlider *livingHumiditySlider;
+    QSpinBox *spinBox;
+    QPushButton *livingHumidityBtn;
+    QWidget *layoutWidget11;
+    QHBoxLayout *hostHumidity;
+    QSlider *hostHumiditySlider;
+    QSpinBox *spinBox_2;
+    QPushButton *hostHumidityBtn;
     QWidget *EnvirmentPage;
     EnvironmentWidget *widget_2;
     QWidget *DataAnalyticsPage;
@@ -107,243 +133,368 @@ public:
         TabWidget->resize(733, 595);
         tabWidget = new QTabWidget(TabWidget);
         tabWidget->setObjectName(QStringLiteral("tabWidget"));
-        tabWidget->setGeometry(QRect(10, 130, 711, 461));
+        tabWidget->setGeometry(QRect(0, 0, 731, 591));
         tabWidget->setTabPosition(QTabWidget::West);
         FurnitureOverviewPage = new QWidget();
         FurnitureOverviewPage->setObjectName(QStringLiteral("FurnitureOverviewPage"));
-        label_5 = new QLabel(FurnitureOverviewPage);
-        label_5->setObjectName(QStringLiteral("label_5"));
-        label_5->setGeometry(QRect(30, 220, 41, 9));
-        label_6 = new QLabel(FurnitureOverviewPage);
-        label_6->setObjectName(QStringLiteral("label_6"));
-        label_6->setGeometry(QRect(140, 220, 41, 9));
-        label_7 = new QLabel(FurnitureOverviewPage);
-        label_7->setObjectName(QStringLiteral("label_7"));
-        label_7->setGeometry(QRect(380, 220, 41, 20));
-        label_8 = new QLabel(FurnitureOverviewPage);
-        label_8->setObjectName(QStringLiteral("label_8"));
-        label_8->setGeometry(QRect(640, 220, 41, 9));
-        label_9 = new QLabel(FurnitureOverviewPage);
-        label_9->setObjectName(QStringLiteral("label_9"));
-        label_9->setGeometry(QRect(30, 340, 41, 9));
-        label_10 = new QLabel(FurnitureOverviewPage);
-        label_10->setObjectName(QStringLiteral("label_10"));
-        label_10->setGeometry(QRect(30, 380, 51, 16));
-        label_11 = new QLabel(FurnitureOverviewPage);
-        label_11->setObjectName(QStringLiteral("label_11"));
-        label_11->setGeometry(QRect(30, 440, 61, 16));
-        label_19 = new QLabel(FurnitureOverviewPage);
-        label_19->setObjectName(QStringLiteral("label_19"));
-        label_19->setGeometry(QRect(20, 260, 41, 9));
-        comboBox = new QComboBox(FurnitureOverviewPage);
-        comboBox->setObjectName(QStringLiteral("comboBox"));
-        comboBox->setGeometry(QRect(120, 250, 62, 22));
-        comboBox_2 = new QComboBox(FurnitureOverviewPage);
-        comboBox_2->setObjectName(QStringLiteral("comboBox_2"));
-        comboBox_2->setGeometry(QRect(360, 250, 62, 22));
-        comboBox_3 = new QComboBox(FurnitureOverviewPage);
-        comboBox_3->setObjectName(QStringLiteral("comboBox_3"));
-        comboBox_3->setGeometry(QRect(630, 240, 62, 22));
-        horizontalSlider = new QSlider(FurnitureOverviewPage);
-        horizontalSlider->setObjectName(QStringLiteral("horizontalSlider"));
-        horizontalSlider->setGeometry(QRect(110, 380, 160, 16));
-        horizontalSlider->setOrientation(Qt::Horizontal);
-        horizontalSlider_2 = new QSlider(FurnitureOverviewPage);
-        horizontalSlider_2->setObjectName(QStringLiteral("horizontalSlider_2"));
-        horizontalSlider_2->setGeometry(QRect(110, 440, 160, 16));
-        horizontalSlider_2->setOrientation(Qt::Horizontal);
-        pushButton_4 = new QPushButton(FurnitureOverviewPage);
-        pushButton_4->setObjectName(QStringLiteral("pushButton_4"));
-        pushButton_4->setGeometry(QRect(360, 380, 80, 15));
-        pushButton_5 = new QPushButton(FurnitureOverviewPage);
-        pushButton_5->setObjectName(QStringLiteral("pushButton_5"));
-        pushButton_5->setGeometry(QRect(360, 440, 80, 15));
-        lcdNumber_4 = new QLCDNumber(FurnitureOverviewPage);
-        lcdNumber_4->setObjectName(QStringLiteral("lcdNumber_4"));
-        lcdNumber_4->setGeometry(QRect(280, 380, 64, 23));
-        lcdNumber_5 = new QLCDNumber(FurnitureOverviewPage);
-        lcdNumber_5->setObjectName(QStringLiteral("lcdNumber_5"));
-        lcdNumber_5->setGeometry(QRect(280, 430, 64, 23));
         layoutWidget = new QWidget(FurnitureOverviewPage);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
         layoutWidget->setGeometry(QRect(20, 10, 65, 171));
-        verticalLayout = new QVBoxLayout(layoutWidget);
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        verticalLayout->setContentsMargins(0, 0, 0, 0);
+        airTitle = new QVBoxLayout(layoutWidget);
+        airTitle->setObjectName(QStringLiteral("airTitle"));
+        airTitle->setContentsMargins(0, 0, 0, 0);
         label = new QLabel(layoutWidget);
         label->setObjectName(QStringLiteral("label"));
 
-        verticalLayout->addWidget(label);
+        airTitle->addWidget(label);
 
         label_15 = new QLabel(layoutWidget);
         label_15->setObjectName(QStringLiteral("label_15"));
 
-        verticalLayout->addWidget(label_15);
+        airTitle->addWidget(label_15);
 
         label_20 = new QLabel(layoutWidget);
         label_20->setObjectName(QStringLiteral("label_20"));
 
-        verticalLayout->addWidget(label_20);
+        airTitle->addWidget(label_20);
 
         label_16 = new QLabel(layoutWidget);
         label_16->setObjectName(QStringLiteral("label_16"));
 
-        verticalLayout->addWidget(label_16);
+        airTitle->addWidget(label_16);
 
         label_17 = new QLabel(layoutWidget);
         label_17->setObjectName(QStringLiteral("label_17"));
 
-        verticalLayout->addWidget(label_17);
+        airTitle->addWidget(label_17);
 
         label_18 = new QLabel(layoutWidget);
         label_18->setObjectName(QStringLiteral("label_18"));
 
-        verticalLayout->addWidget(label_18);
+        airTitle->addWidget(label_18);
 
         layoutWidget1 = new QWidget(FurnitureOverviewPage);
         layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
         layoutWidget1->setGeometry(QRect(100, 60, 591, 22));
-        horizontalLayout = new QHBoxLayout(layoutWidget1);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
-        label_2 = new QLabel(layoutWidget1);
-        label_2->setObjectName(QStringLiteral("label_2"));
+        airName = new QHBoxLayout(layoutWidget1);
+        airName->setObjectName(QStringLiteral("airName"));
+        airName->setContentsMargins(0, 0, 0, 0);
+        livingAir = new QLabel(layoutWidget1);
+        livingAir->setObjectName(QStringLiteral("livingAir"));
 
-        horizontalLayout->addWidget(label_2);
+        airName->addWidget(livingAir);
 
         horizontalSpacer_7 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout->addItem(horizontalSpacer_7);
+        airName->addItem(horizontalSpacer_7);
 
-        label_3 = new QLabel(layoutWidget1);
-        label_3->setObjectName(QStringLiteral("label_3"));
+        hostAir = new QLabel(layoutWidget1);
+        hostAir->setObjectName(QStringLiteral("hostAir"));
 
-        horizontalLayout->addWidget(label_3);
+        airName->addWidget(hostAir);
 
         horizontalSpacer_8 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout->addItem(horizontalSpacer_8);
+        airName->addItem(horizontalSpacer_8);
 
-        label_4 = new QLabel(layoutWidget1);
-        label_4->setObjectName(QStringLiteral("label_4"));
+        secondAir = new QLabel(layoutWidget1);
+        secondAir->setObjectName(QStringLiteral("secondAir"));
 
-        horizontalLayout->addWidget(label_4);
+        airName->addWidget(secondAir);
 
         layoutWidget2 = new QWidget(FurnitureOverviewPage);
         layoutWidget2->setObjectName(QStringLiteral("layoutWidget2"));
         layoutWidget2->setGeometry(QRect(90, 100, 611, 31));
-        horizontalLayout_2 = new QHBoxLayout(layoutWidget2);
-        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
-        lcdNumber = new QLCDNumber(layoutWidget2);
-        lcdNumber->setObjectName(QStringLiteral("lcdNumber"));
+        airLcd = new QHBoxLayout(layoutWidget2);
+        airLcd->setObjectName(QStringLiteral("airLcd"));
+        airLcd->setContentsMargins(0, 0, 0, 0);
+        livingAirEdit = new QLineEdit(layoutWidget2);
+        livingAirEdit->setObjectName(QStringLiteral("livingAirEdit"));
 
-        horizontalLayout_2->addWidget(lcdNumber);
+        airLcd->addWidget(livingAirEdit);
 
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout_2->addItem(horizontalSpacer);
+        airLcd->addItem(horizontalSpacer);
 
-        lcdNumber_2 = new QLCDNumber(layoutWidget2);
-        lcdNumber_2->setObjectName(QStringLiteral("lcdNumber_2"));
+        hostAirEdit = new QLineEdit(layoutWidget2);
+        hostAirEdit->setObjectName(QStringLiteral("hostAirEdit"));
 
-        horizontalLayout_2->addWidget(lcdNumber_2);
+        airLcd->addWidget(hostAirEdit);
 
         horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout_2->addItem(horizontalSpacer_2);
+        airLcd->addItem(horizontalSpacer_2);
 
-        lcdNumber_3 = new QLCDNumber(layoutWidget2);
-        lcdNumber_3->setObjectName(QStringLiteral("lcdNumber_3"));
+        secondAirEdit = new QLineEdit(layoutWidget2);
+        secondAirEdit->setObjectName(QStringLiteral("secondAirEdit"));
 
-        horizontalLayout_2->addWidget(lcdNumber_3);
+        airLcd->addWidget(secondAirEdit);
 
         layoutWidget3 = new QWidget(FurnitureOverviewPage);
         layoutWidget3->setObjectName(QStringLiteral("layoutWidget3"));
-        layoutWidget3->setGeometry(QRect(100, 130, 591, 22));
-        horizontalLayout_3 = new QHBoxLayout(layoutWidget3);
-        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
-        horizontalLayout_3->setContentsMargins(0, 0, 0, 0);
-        label_12 = new QLabel(layoutWidget3);
-        label_12->setObjectName(QStringLiteral("label_12"));
+        layoutWidget3->setGeometry(QRect(100, 130, 591, 24));
+        airMode = new QHBoxLayout(layoutWidget3);
+        airMode->setObjectName(QStringLiteral("airMode"));
+        airMode->setContentsMargins(0, 0, 0, 0);
+        livingAirMode = new QComboBox(layoutWidget3);
+        livingAirMode->setObjectName(QStringLiteral("livingAirMode"));
 
-        horizontalLayout_3->addWidget(label_12);
+        airMode->addWidget(livingAirMode);
 
         horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout_3->addItem(horizontalSpacer_3);
+        airMode->addItem(horizontalSpacer_3);
 
-        label_13 = new QLabel(layoutWidget3);
-        label_13->setObjectName(QStringLiteral("label_13"));
+        hostAirMode = new QComboBox(layoutWidget3);
+        hostAirMode->setObjectName(QStringLiteral("hostAirMode"));
 
-        horizontalLayout_3->addWidget(label_13);
+        airMode->addWidget(hostAirMode);
 
         horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout_3->addItem(horizontalSpacer_4);
+        airMode->addItem(horizontalSpacer_4);
 
-        label_14 = new QLabel(layoutWidget3);
-        label_14->setObjectName(QStringLiteral("label_14"));
+        secondAirMode = new QComboBox(layoutWidget3);
+        secondAirMode->setObjectName(QStringLiteral("secondAirMode"));
 
-        horizontalLayout_3->addWidget(label_14);
+        airMode->addWidget(secondAirMode);
 
         layoutWidget4 = new QWidget(FurnitureOverviewPage);
         layoutWidget4->setObjectName(QStringLiteral("layoutWidget4"));
         layoutWidget4->setGeometry(QRect(100, 150, 591, 31));
-        horizontalLayout_4 = new QHBoxLayout(layoutWidget4);
-        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
-        horizontalLayout_4->setContentsMargins(0, 0, 0, 0);
-        timeEdit = new QTimeEdit(layoutWidget4);
-        timeEdit->setObjectName(QStringLiteral("timeEdit"));
+        airAuto = new QHBoxLayout(layoutWidget4);
+        airAuto->setObjectName(QStringLiteral("airAuto"));
+        airAuto->setContentsMargins(0, 0, 0, 0);
+        livingAirTime = new QTimeEdit(layoutWidget4);
+        livingAirTime->setObjectName(QStringLiteral("livingAirTime"));
 
-        horizontalLayout_4->addWidget(timeEdit);
+        airAuto->addWidget(livingAirTime);
 
         horizontalSpacer_5 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout_4->addItem(horizontalSpacer_5);
+        airAuto->addItem(horizontalSpacer_5);
 
-        timeEdit_2 = new QTimeEdit(layoutWidget4);
-        timeEdit_2->setObjectName(QStringLiteral("timeEdit_2"));
+        hostAirTime = new QTimeEdit(layoutWidget4);
+        hostAirTime->setObjectName(QStringLiteral("hostAirTime"));
 
-        horizontalLayout_4->addWidget(timeEdit_2);
+        airAuto->addWidget(hostAirTime);
 
         horizontalSpacer_6 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout_4->addItem(horizontalSpacer_6);
+        airAuto->addItem(horizontalSpacer_6);
 
-        timeEdit_3 = new QTimeEdit(layoutWidget4);
-        timeEdit_3->setObjectName(QStringLiteral("timeEdit_3"));
+        secondAirTime = new QTimeEdit(layoutWidget4);
+        secondAirTime->setObjectName(QStringLiteral("secondAirTime"));
 
-        horizontalLayout_4->addWidget(timeEdit_3);
+        airAuto->addWidget(secondAirTime);
 
         layoutWidget5 = new QWidget(FurnitureOverviewPage);
         layoutWidget5->setObjectName(QStringLiteral("layoutWidget5"));
         layoutWidget5->setGeometry(QRect(100, 80, 591, 22));
-        horizontalLayout_5 = new QHBoxLayout(layoutWidget5);
-        horizontalLayout_5->setObjectName(QStringLiteral("horizontalLayout_5"));
-        horizontalLayout_5->setContentsMargins(0, 0, 0, 0);
-        pushButton = new QPushButton(layoutWidget5);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
+        airBtn = new QHBoxLayout(layoutWidget5);
+        airBtn->setObjectName(QStringLiteral("airBtn"));
+        airBtn->setContentsMargins(0, 0, 0, 0);
+        livingAirBtn = new QPushButton(layoutWidget5);
+        livingAirBtn->setObjectName(QStringLiteral("livingAirBtn"));
 
-        horizontalLayout_5->addWidget(pushButton);
+        airBtn->addWidget(livingAirBtn);
 
         horizontalSpacer_9 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout_5->addItem(horizontalSpacer_9);
+        airBtn->addItem(horizontalSpacer_9);
 
-        pushButton_2 = new QPushButton(layoutWidget5);
-        pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
+        hostAirBtn = new QPushButton(layoutWidget5);
+        hostAirBtn->setObjectName(QStringLiteral("hostAirBtn"));
 
-        horizontalLayout_5->addWidget(pushButton_2);
+        airBtn->addWidget(hostAirBtn);
 
         horizontalSpacer_10 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-        horizontalLayout_5->addItem(horizontalSpacer_10);
+        airBtn->addItem(horizontalSpacer_10);
 
-        pushButton_3 = new QPushButton(layoutWidget5);
-        pushButton_3->setObjectName(QStringLiteral("pushButton_3"));
+        secondAirBtn = new QPushButton(layoutWidget5);
+        secondAirBtn->setObjectName(QStringLiteral("secondAirBtn"));
 
-        horizontalLayout_5->addWidget(pushButton_3);
+        airBtn->addWidget(secondAirBtn);
+
+        layoutWidget_2 = new QWidget(FurnitureOverviewPage);
+        layoutWidget_2->setObjectName(QStringLiteral("layoutWidget_2"));
+        layoutWidget_2->setGeometry(QRect(100, 280, 591, 31));
+        lightAuto = new QHBoxLayout(layoutWidget_2);
+        lightAuto->setObjectName(QStringLiteral("lightAuto"));
+        lightAuto->setContentsMargins(0, 0, 0, 0);
+        livingLightAuto = new QTimeEdit(layoutWidget_2);
+        livingLightAuto->setObjectName(QStringLiteral("livingLightAuto"));
+
+        lightAuto->addWidget(livingLightAuto);
+
+        horizontalSpacer_15 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        lightAuto->addItem(horizontalSpacer_15);
+
+        hostLightAuto = new QTimeEdit(layoutWidget_2);
+        hostLightAuto->setObjectName(QStringLiteral("hostLightAuto"));
+
+        lightAuto->addWidget(hostLightAuto);
+
+        horizontalSpacer_16 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        lightAuto->addItem(horizontalSpacer_16);
+
+        secondLightAuto = new QTimeEdit(layoutWidget_2);
+        secondLightAuto->setObjectName(QStringLiteral("secondLightAuto"));
+
+        lightAuto->addWidget(secondLightAuto);
+
+        layoutWidget6 = new QWidget(FurnitureOverviewPage);
+        layoutWidget6->setObjectName(QStringLiteral("layoutWidget6"));
+        layoutWidget6->setGeometry(QRect(20, 190, 56, 121));
+        lightTitle = new QVBoxLayout(layoutWidget6);
+        lightTitle->setObjectName(QStringLiteral("lightTitle"));
+        lightTitle->setContentsMargins(0, 0, 0, 0);
+        label_5 = new QLabel(layoutWidget6);
+        label_5->setObjectName(QStringLiteral("label_5"));
+
+        lightTitle->addWidget(label_5);
+
+        label_21 = new QLabel(layoutWidget6);
+        label_21->setObjectName(QStringLiteral("label_21"));
+
+        lightTitle->addWidget(label_21);
+
+        label_19 = new QLabel(layoutWidget6);
+        label_19->setObjectName(QStringLiteral("label_19"));
+
+        lightTitle->addWidget(label_19);
+
+        label_22 = new QLabel(layoutWidget6);
+        label_22->setObjectName(QStringLiteral("label_22"));
+
+        lightTitle->addWidget(label_22);
+
+        layoutWidget7 = new QWidget(FurnitureOverviewPage);
+        layoutWidget7->setObjectName(QStringLiteral("layoutWidget7"));
+        layoutWidget7->setGeometry(QRect(100, 250, 591, 24));
+        lightMode = new QHBoxLayout(layoutWidget7);
+        lightMode->setObjectName(QStringLiteral("lightMode"));
+        lightMode->setContentsMargins(0, 0, 0, 0);
+        livingLightMode = new QComboBox(layoutWidget7);
+        livingLightMode->setObjectName(QStringLiteral("livingLightMode"));
+
+        lightMode->addWidget(livingLightMode);
+
+        horizontalSpacer_13 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        lightMode->addItem(horizontalSpacer_13);
+
+        hostLightMode = new QComboBox(layoutWidget7);
+        hostLightMode->setObjectName(QStringLiteral("hostLightMode"));
+
+        lightMode->addWidget(hostLightMode);
+
+        horizontalSpacer_14 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        lightMode->addItem(horizontalSpacer_14);
+
+        secondLightMode = new QComboBox(layoutWidget7);
+        secondLightMode->setObjectName(QStringLiteral("secondLightMode"));
+
+        lightMode->addWidget(secondLightMode);
+
+        layoutWidget8 = new QWidget(FurnitureOverviewPage);
+        layoutWidget8->setObjectName(QStringLiteral("layoutWidget8"));
+        layoutWidget8->setGeometry(QRect(100, 220, 591, 22));
+        lightName = new QHBoxLayout(layoutWidget8);
+        lightName->setObjectName(QStringLiteral("lightName"));
+        lightName->setContentsMargins(0, 0, 0, 0);
+        label_6 = new QLabel(layoutWidget8);
+        label_6->setObjectName(QStringLiteral("label_6"));
+
+        lightName->addWidget(label_6);
+
+        horizontalSpacer_11 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        lightName->addItem(horizontalSpacer_11);
+
+        label_7 = new QLabel(layoutWidget8);
+        label_7->setObjectName(QStringLiteral("label_7"));
+
+        lightName->addWidget(label_7);
+
+        horizontalSpacer_12 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        lightName->addItem(horizontalSpacer_12);
+
+        label_8 = new QLabel(layoutWidget8);
+        label_8->setObjectName(QStringLiteral("label_8"));
+
+        lightName->addWidget(label_8);
+
+        layoutWidget9 = new QWidget(FurnitureOverviewPage);
+        layoutWidget9->setObjectName(QStringLiteral("layoutWidget9"));
+        layoutWidget9->setGeometry(QRect(20, 340, 61, 131));
+        humidityTitle = new QVBoxLayout(layoutWidget9);
+        humidityTitle->setObjectName(QStringLiteral("humidityTitle"));
+        humidityTitle->setContentsMargins(0, 0, 0, 0);
+        label_9 = new QLabel(layoutWidget9);
+        label_9->setObjectName(QStringLiteral("label_9"));
+
+        humidityTitle->addWidget(label_9);
+
+        label_10 = new QLabel(layoutWidget9);
+        label_10->setObjectName(QStringLiteral("label_10"));
+
+        humidityTitle->addWidget(label_10);
+
+        label_11 = new QLabel(layoutWidget9);
+        label_11->setObjectName(QStringLiteral("label_11"));
+
+        humidityTitle->addWidget(label_11);
+
+        layoutWidget10 = new QWidget(FurnitureOverviewPage);
+        layoutWidget10->setObjectName(QStringLiteral("layoutWidget10"));
+        layoutWidget10->setGeometry(QRect(100, 400, 361, 25));
+        livingHumidity = new QHBoxLayout(layoutWidget10);
+        livingHumidity->setObjectName(QStringLiteral("livingHumidity"));
+        livingHumidity->setContentsMargins(0, 0, 0, 0);
+        livingHumiditySlider = new QSlider(layoutWidget10);
+        livingHumiditySlider->setObjectName(QStringLiteral("livingHumiditySlider"));
+        livingHumiditySlider->setOrientation(Qt::Horizontal);
+
+        livingHumidity->addWidget(livingHumiditySlider);
+
+        spinBox = new QSpinBox(layoutWidget10);
+        spinBox->setObjectName(QStringLiteral("spinBox"));
+
+        livingHumidity->addWidget(spinBox);
+
+        livingHumidityBtn = new QPushButton(layoutWidget10);
+        livingHumidityBtn->setObjectName(QStringLiteral("livingHumidityBtn"));
+
+        livingHumidity->addWidget(livingHumidityBtn);
+
+        layoutWidget11 = new QWidget(FurnitureOverviewPage);
+        layoutWidget11->setObjectName(QStringLiteral("layoutWidget11"));
+        layoutWidget11->setGeometry(QRect(100, 440, 361, 25));
+        hostHumidity = new QHBoxLayout(layoutWidget11);
+        hostHumidity->setObjectName(QStringLiteral("hostHumidity"));
+        hostHumidity->setContentsMargins(0, 0, 0, 0);
+        hostHumiditySlider = new QSlider(layoutWidget11);
+        hostHumiditySlider->setObjectName(QStringLiteral("hostHumiditySlider"));
+        hostHumiditySlider->setOrientation(Qt::Horizontal);
+
+        hostHumidity->addWidget(hostHumiditySlider);
+
+        spinBox_2 = new QSpinBox(layoutWidget11);
+        spinBox_2->setObjectName(QStringLiteral("spinBox_2"));
+
+        hostHumidity->addWidget(spinBox_2);
+
+        hostHumidityBtn = new QPushButton(layoutWidget11);
+        hostHumidityBtn->setObjectName(QStringLiteral("hostHumidityBtn"));
+
+        hostHumidity->addWidget(hostHumidityBtn);
 
         tabWidget->addTab(FurnitureOverviewPage, QString());
         EnvirmentPage = new QWidget();
@@ -361,7 +512,7 @@ public:
 
         retranslateUi(TabWidget);
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(TabWidget);
@@ -370,31 +521,30 @@ public:
     void retranslateUi(QWidget *TabWidget)
     {
         TabWidget->setWindowTitle(QApplication::translate("TabWidget", "Form", Q_NULLPTR));
-        label_5->setText(QApplication::translate("TabWidget", "\347\201\257", Q_NULLPTR));
-        label_6->setText(QApplication::translate("TabWidget", "\345\256\242\345\216\205\347\201\257", Q_NULLPTR));
-        label_7->setText(QApplication::translate("TabWidget", "\344\270\273\345\215\247\347\201\257", Q_NULLPTR));
-        label_8->setText(QApplication::translate("TabWidget", "\346\254\241\345\215\247\347\201\257", Q_NULLPTR));
-        label_9->setText(QApplication::translate("TabWidget", "\345\212\240\346\271\277\345\231\250\357\274\232", Q_NULLPTR));
-        label_10->setText(QApplication::translate("TabWidget", "\345\256\242\345\216\205\345\212\240\346\271\277\345\231\250", Q_NULLPTR));
-        label_11->setText(QApplication::translate("TabWidget", "\344\270\273\345\215\247\345\212\240\346\271\277\345\231\250", Q_NULLPTR));
-        label_19->setText(QApplication::translate("TabWidget", "\346\250\241\345\274\217\351\200\211\346\213\251\357\274\232", Q_NULLPTR));
-        pushButton_4->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
-        pushButton_5->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
         label->setText(QApplication::translate("TabWidget", "\347\251\272\350\260\203\346\216\247\345\210\266", Q_NULLPTR));
         label_15->setText(QApplication::translate("TabWidget", "\347\251\272\350\260\203\345\220\215\347\247\260\357\274\232", Q_NULLPTR));
         label_20->setText(QApplication::translate("TabWidget", "\347\251\272\350\260\203\345\274\200\345\205\263\357\274\232", Q_NULLPTR));
         label_16->setText(QApplication::translate("TabWidget", "\347\251\272\350\260\203\346\270\251\345\272\246\357\274\232", Q_NULLPTR));
         label_17->setText(QApplication::translate("TabWidget", "\347\251\272\350\260\203\346\250\241\345\274\217\357\274\232", Q_NULLPTR));
         label_18->setText(QApplication::translate("TabWidget", "\347\251\272\350\260\203\350\207\252\345\212\250\345\256\232\346\227\266\357\274\232", Q_NULLPTR));
-        label_2->setText(QApplication::translate("TabWidget", "\345\256\242\345\216\205\347\251\272\350\260\203", Q_NULLPTR));
-        label_3->setText(QApplication::translate("TabWidget", "\344\270\273\345\215\247\347\251\272\350\260\203", Q_NULLPTR));
-        label_4->setText(QApplication::translate("TabWidget", "\346\254\241\345\215\247\347\251\272\350\260\203", Q_NULLPTR));
-        label_12->setText(QApplication::translate("TabWidget", "TextLabel", Q_NULLPTR));
-        label_13->setText(QApplication::translate("TabWidget", "TextLabel", Q_NULLPTR));
-        label_14->setText(QApplication::translate("TabWidget", "TextLabel", Q_NULLPTR));
-        pushButton->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
-        pushButton_2->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
-        pushButton_3->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
+        livingAir->setText(QApplication::translate("TabWidget", "\345\256\242\345\216\205\347\251\272\350\260\203", Q_NULLPTR));
+        hostAir->setText(QApplication::translate("TabWidget", "\344\270\273\345\215\247\347\251\272\350\260\203", Q_NULLPTR));
+        secondAir->setText(QApplication::translate("TabWidget", "\346\254\241\345\215\247\347\251\272\350\260\203", Q_NULLPTR));
+        livingAirBtn->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
+        hostAirBtn->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
+        secondAirBtn->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
+        label_5->setText(QApplication::translate("TabWidget", "\347\201\257\346\216\247\345\210\266", Q_NULLPTR));
+        label_21->setText(QApplication::translate("TabWidget", "\347\201\257\345\220\215\357\274\232", Q_NULLPTR));
+        label_19->setText(QApplication::translate("TabWidget", "\346\250\241\345\274\217\351\200\211\346\213\251\357\274\232", Q_NULLPTR));
+        label_22->setText(QApplication::translate("TabWidget", "\347\201\257\350\207\252\345\212\250\345\256\232\346\227\266\357\274\232", Q_NULLPTR));
+        label_6->setText(QApplication::translate("TabWidget", "\345\256\242\345\216\205\347\201\257", Q_NULLPTR));
+        label_7->setText(QApplication::translate("TabWidget", "\344\270\273\345\215\247\347\201\257", Q_NULLPTR));
+        label_8->setText(QApplication::translate("TabWidget", "\346\254\241\345\215\247\347\201\257", Q_NULLPTR));
+        label_9->setText(QApplication::translate("TabWidget", "\345\212\240\346\271\277\345\231\250\346\216\247\345\210\266", Q_NULLPTR));
+        label_10->setText(QApplication::translate("TabWidget", "\345\256\242\345\216\205\345\212\240\346\271\277\345\231\250", Q_NULLPTR));
+        label_11->setText(QApplication::translate("TabWidget", "\344\270\273\345\215\247\345\212\240\346\271\277\345\231\250", Q_NULLPTR));
+        livingHumidityBtn->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
+        hostHumidityBtn->setText(QApplication::translate("TabWidget", "PushButton", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(FurnitureOverviewPage), QApplication::translate("TabWidget", "\345\256\266\345\205\267\346\200\273\350\247\210", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(EnvirmentPage), QApplication::translate("TabWidget", "\347\216\257\345\242\203\347\233\221\346\265\213", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(DataAnalyticsPage), QApplication::translate("TabWidget", "\346\225\260\346\215\256\345\210\206\346\236\220", Q_NULLPTR));
