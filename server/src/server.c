@@ -38,6 +38,10 @@ void handleRequest(const char* request)
 	else if (strncmp(request, "/weather", strlen("/weather")) == 0) {
         // 处理获取天气数据请求
         handleWeatherRequest();
+    }else if (strncmp(request, "/network/test", strlen("/network/test")) == 0)
+    {
+        // 处理网络连接测试请求
+        handleNetworkConnectionTest();
     }
     else
     {

@@ -30,13 +30,13 @@ public:
     {
         if (Widget->objectName().isEmpty())
             Widget->setObjectName(QStringLiteral("Widget"));
-        Widget->resize(818, 597);
+        Widget->resize(1000, 1000);
         tabwidget = new TabWidget(Widget);
         tabwidget->setObjectName(QStringLiteral("tabwidget"));
-        tabwidget->setGeometry(QRect(10, 100, 741, 481));
+        tabwidget->setGeometry(QRect(0, 90, 1000, 900));
         weatherwidget = new WeatherWidget(Widget);
         weatherwidget->setObjectName(QStringLiteral("weatherwidget"));
-        weatherwidget->setGeometry(QRect(10, 10, 711, 81));
+        weatherwidget->setGeometry(QRect(10, 10, 981, 81));
 
         retranslateUi(Widget);
 

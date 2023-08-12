@@ -67,7 +67,7 @@ void handleUserRegister(char* request) {
 
   sendHttpResp(200, "application/json", resp_str);
   
-  cJSON_Delete(resp); // 清楚object
+  cJSON_Delete(resp); // 清除object
         free(resp_str);
         cJSON_Delete(json);
     } else {

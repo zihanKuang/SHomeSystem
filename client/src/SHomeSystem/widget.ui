@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>818</width>
-    <height>597</height>
+    <width>1000</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="TabWidget" name="tabwidget" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>100</y>
-     <width>741</width>
-     <height>481</height>
+     <x>0</x>
+     <y>90</y>
+     <width>1000</width>
+     <height>900</height>
     </rect>
    </property>
   </widget>
@@ -28,7 +28,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>711</width>
+     <width>981</width>
      <height>81</height>
     </rect>
    </property>
