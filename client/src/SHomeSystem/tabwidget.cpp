@@ -65,6 +65,10 @@ TabWidget::TabWidget(QWidget *parent) :
 //    // 连接请求完成信号到槽函数
 //    connect(reply, &QNetworkReply::finished, this, &TabWidget::onServerConnectionFinished);
 
+
+    // 当tabwidget的页面的index切到1时，客户端就会像服务端发送耗电量计算的请求
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &TabWidget::handleTabChange);
+
     //空调模式
     connect(ui->hostAirMode, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &TabWidget::onHostAirModeChanged);
@@ -160,6 +164,190 @@ TabWidget::TabWidget(QWidget *parent) :
 //    }
 //}
 
+// 处理页面切换信号的槽函数
+void TabWidget::handleTabChange(int newIndex)
+{
+    if (newIndex == 1) {
+        // 切换到索引为1的页面，发送相关请求
+        sendDeviceTotalPowerRequest("http://your-server-url.com/data/airTotalPower");
+        sendDeviceTotalPowerRequest("http://your-server-url.com/data/lightTotalPower");
+        sendDeviceTotalPowerRequest("http://your-server-url.com/data/humidityTotalPower");
+    }
+    if (newIndex == 2) {
+        //室内温度和天气折线图处理
+    }
+}
+
+// 发送设备耗电量请求的函数
+void TabWidget::sendDeviceTotalPowerRequest(const QString& url)
+{
+    QNetworkRequest request(url);
+    QNetworkAccessManager manager;
+    QNetworkReply* reply = manager.get(request);
+
+    QObject::connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            // 处理服务器响应的数据
+            QString response = reply->readAll();
+
+            // 解析 JSON 响应，获取耗电量信息
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(response.toUtf8());
+            if (!jsonResponse.isNull() && jsonResponse.isObject()) {
+                QJsonObject jsonObject = jsonResponse.object();
+                if (jsonObject.contains("totalPower")) {
+                    double totalPower = jsonObject["totalPower"].toDouble();
+
+                    // 在这里进行数据渲染或其他操作
+                    //
+                    //未实现
+                    processDeviceTotalPowerResponse(response);
+                }
+            }
+
+        } else {
+            // 处理错误
+            qDebug() << "Error: " << reply->errorString();
+        }
+
+        reply->deleteLater();
+    });
+}
+
+void TabWidget::sendAirDataToServer(Device::State state, double temperature,
+                                    QDateTime &timestamp, AirConditioner::AirMode mode)
+{
+    // 构建HTTP请求，将空调的设备状态、温度、定时类型和模式等数据传递给服务器
+    // 请根据实际情况修改服务器URL和参数
+    QUrl url("http://your-server-url.com/update_air_device_status");
+    QUrlQuery query;
+
+    query.addQueryItem("state", state == Device::State::ON ? "on" : "off");
+    query.addQueryItem("temperature", QString::number(temperature));
+    query.addQueryItem("timestamp", timestamp.toString(Qt::ISODate));
+    query.addQueryItem("mode", QString::number(static_cast<int>(mode))); // 或者发送模式的枚举值
+
+    url.setQuery(query);
+
+    QNetworkRequest request(url);
+    QNetworkAccessManager manager;
+    QNetworkReply *reply = manager.get(request);
+
+    // 处理服务器的响应
+    QObject::connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            // 处理服务器响应的数据
+            QString response = reply->readAll();
+
+            // 解析 JSON 响应
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(response.toUtf8());
+            QJsonObject jsonObject = jsonResponse.object();
+
+            if (jsonObject.contains("success") && jsonObject["success"].toBool()) {
+                // 添加成功
+                qDebug() << "Device status updated successfully.";
+            } else {
+                // 添加失败
+                qDebug() << "Failed to update device status.";
+            }
+
+        } else {
+            // 处理错误
+            qDebug() << "Error: " << reply->errorString();
+        }
+
+        reply->deleteLater();
+    });
+}
+
+void TabWidget::sendLightDataToServer(Device::State state, QDateTime &timestamp, Light::LightMode mode)
+{
+    // 构建HTTP请求，将灯光的设备状态、定时类型和模式等数据传递给服务器
+    // 请根据实际情况修改服务器URL和参数
+    QUrl url("http://your-server-url.com/update_light_device_status");
+    QUrlQuery query;
+
+    query.addQueryItem("state", state == Device::State::ON ? "on" : "off");
+    query.addQueryItem("timestamp", timestamp.toString(Qt::ISODate));
+    query.addQueryItem("mode", QString::number(static_cast<int>(mode))); // 或者发送模式的枚举值
+
+    url.setQuery(query);
+
+    QNetworkRequest request(url);
+    QNetworkAccessManager manager;
+    QNetworkReply *reply = manager.get(request);
+
+    // 处理服务器的响应
+    QObject::connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            // 处理服务器响应的数据
+            QString response = reply->readAll();
+
+            // 解析 JSON 响应
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(response.toUtf8());
+            QJsonObject jsonObject = jsonResponse.object();
+
+            if (jsonObject.contains("success") && jsonObject["success"].toBool()) {
+                // 添加成功
+                qDebug() << "Device status updated successfully.";
+            } else {
+                // 添加失败
+                qDebug() << "Failed to update device status.";
+            }
+
+        } else {
+            // 处理错误
+            qDebug() << "Error: " << reply->errorString();
+        }
+
+        reply->deleteLater();
+    });
+}
+
+void TabWidget::sendHumidityDataToServer(Device::State state, double humidity, QDateTime &timestamp)
+{
+    // 构建HTTP请求，将加湿器的设备状态、湿度、定时类型等数据传递给服务器
+    // 请根据实际情况修改服务器URL和参数
+    QUrl url("http://your-server-url.com/update_humidity_device_status");
+    QUrlQuery query;
+
+    query.addQueryItem("state", state == Device::State::ON ? "on" : "off");
+    query.addQueryItem("humidity", QString::number(humidity));
+    query.addQueryItem("timestamp", timestamp.toString(Qt::ISODate));
+
+    url.setQuery(query);
+
+    QNetworkRequest request(url);
+    QNetworkAccessManager manager;
+    QNetworkReply *reply = manager.get(request);
+
+    // 处理服务器的响应
+    QObject::connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            // 处理服务器响应的数据
+            QString response = reply->readAll();
+
+            // 解析 JSON 响应
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(response.toUtf8());
+            QJsonObject jsonObject = jsonResponse.object();
+
+            if (jsonObject.contains("success") && jsonObject["success"].toBool()) {
+                // 添加成功
+                qDebug() << "Device status updated successfully.";
+            } else {
+                // 添加失败
+                qDebug() << "Failed to update device status.";
+            }
+
+        } else {
+            // 处理错误
+            qDebug() << "Error: " << reply->errorString();
+        }
+
+        reply->deleteLater();
+    });
+
+}
+
 // 更新主卧空调的 QLabel
 void TabWidget::updateHostAirStatusLabel()
 {
@@ -186,6 +374,12 @@ void TabWidget::updateHostAirStatusLabel()
         }
     }
     ui->hostAirShow->setText(statusText);
+
+    // 获取当前时间戳
+    QDateTime currentTimestamp = QDateTime::currentDateTime();
+    // 将更新后的状态数据发送到服务器
+    sendAirDataToServer(hostAir->getState(), hostAir->getTemperature(),
+                        currentTimestamp, hostAir->getMode());
 }
 
 void TabWidget::updateLivingAirStatusLabel()
@@ -213,6 +407,12 @@ void TabWidget::updateLivingAirStatusLabel()
         }
     }
     ui->livingAirShow->setText(statusText);
+
+    // 获取当前时间戳
+    QDateTime currentTimestamp = QDateTime::currentDateTime();
+    // 将更新后的状态数据发送到服务器
+    sendAirDataToServer(livingAir->getState(), livingAir->getTemperature(),
+                        currentTimestamp, livingAir->getMode());
 }
 
 void TabWidget::updateSecondAirStatusLabel()
@@ -240,6 +440,11 @@ void TabWidget::updateSecondAirStatusLabel()
         }
     }
     ui->secondAirShow->setText(statusText);
+    // 获取当前时间戳
+    QDateTime currentTimestamp = QDateTime::currentDateTime();
+    // 将更新后的状态数据发送到服务器
+    sendAirDataToServer(secondAir->getState(), secondAir->getTemperature(),
+                        currentTimestamp, secondAir->getMode());
 }
 
 // 空调温度编辑完成槽函数
@@ -309,16 +514,23 @@ void TabWidget::onSecondAirTimeButtonClicked() {
     updateSecondAirStatusLabel();
 }
 
-void TabWidget::timeEvent(QTimerEvent* event) {
+void TabWidget::timerEvent(QTimerEvent* event) {
+    //如果timer已经结束
+    if(visSet.find(event->timerId()) != visSet.end()) {
+        return;
+    }
     //计时结束
-    if(TimerIndex2MyTimerMap[event->timerId()]->current == TimerIndex2MyTimerMap[event->timerId()]->target) {
+    if(TimerIndex2MyTimerMap[event->timerId()]->current == TimerIndex2MyTimerMap[event->timerId()]->target - 1) {
         //发送给执行器
-
+        qDebug() << "yes" << endl;
+        visSet.insert(event->timerId());
     }
     else {
         TimerIndex2MyTimerMap[event->timerId()]->current++;
+        qDebug() << "no" << endl;
     }
 }
+
 
 //void TabWidget::onHostAirTimerTimeChanged(const QTime &time)
 //{
@@ -425,6 +637,12 @@ void TabWidget::updateHostHumidityStatusLabel() {
         ui->hostHumidityShow->setText(statusText);
     }
     ui->hostHumidityShow->setText(statusText);
+
+    // 获取当前时间戳
+    QDateTime currentTimestamp = QDateTime::currentDateTime();
+
+    // 在更新标签的同时发送数据到服务器
+    sendHumidityDataToServer(hostHumidity->getState(), hostHumidity->getHumidity(), currentTimestamp);
 }
 
 // 更新客厅加湿器状态Label
@@ -439,6 +657,11 @@ void TabWidget::updateLivingHumidityStatusLabel() {
         ui->livingHumidityShow->setText(statusText);
     }
     ui->livingHumidityShow->setText(statusText);
+
+    QDateTime currentTimestamp = QDateTime::currentDateTime();
+
+    // 在更新标签的同时发送数据到服务器
+    sendHumidityDataToServer(livingHumidity->getState(), livingHumidity->getHumidity(), currentTimestamp);
 }
 
 // 加湿器开关按钮点击槽函数
@@ -527,6 +750,12 @@ void TabWidget::updateHostLightStatusLabel()
         }
     }
     ui->hostLightShow->setText(hostLightStatusText);
+
+    // 获取当前时间戳
+    QDateTime currentTimestamp = QDateTime::currentDateTime();
+
+    // 将更新后的状态数据发送到服务器
+    sendLightDataToServer(hostLight->getState(), currentTimestamp, hostLight->getMode());
 }
 
 void TabWidget::updateLivingLightStatusLabel()
@@ -553,6 +782,12 @@ void TabWidget::updateLivingLightStatusLabel()
         }
     }
     ui->livingLightShow->setText(livingLightStatusText);
+
+    // 获取当前时间戳
+    QDateTime currentTimestamp = QDateTime::currentDateTime();
+
+    // 将更新后的状态数据发送到服务器
+    sendLightDataToServer(livingLight->getState(), currentTimestamp, livingLight->getMode());
 }
 
 void TabWidget::updateSecondLightStatusLabel()
@@ -579,6 +814,12 @@ void TabWidget::updateSecondLightStatusLabel()
         }
     }
     ui->secondLightShow->setText(secondLightStatusText);
+
+    // 获取当前时间戳
+    QDateTime currentTimestamp = QDateTime::currentDateTime();
+
+    // 将更新后的状态数据发送到服务器
+    sendLightDataToServer(secondLight->getState(), currentTimestamp, secondLight->getMode());
 }
 
 // 灯光定时时间改变槽函数

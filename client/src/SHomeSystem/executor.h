@@ -1,6 +1,13 @@
+#include <QTimer>
+
 class Executor {
 
 public:
+
+  QTimer *timer;
+
+  void startTimer(int interval);
+
   void makeStrategy();
 
   void scheduleTask();

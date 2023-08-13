@@ -30,19 +30,60 @@ void handleRequest(const char* request)
         // 处理设备控制请求
         handleDeviceControl(request);
     }
-    else if (strncmp(request, "/user/data/analyze", strlen("/user/data/analyze")) == 0)
-    {
-        // 处理用户数据分析请求
-        analyzeUserData(request);
-    }
+    //else if (strncmp(request, "/user/data/analyze", strlen("/user/data/analyze")) == 0)
+    //{
+    //    // 处理用户数据分析请求
+    //    analyzeUserData(request);
+    //}
 	else if (strncmp(request, "/weather", strlen("/weather")) == 0) {
         // 处理获取天气数据请求
         handleWeatherRequest();
-    }else if (strncmp(request, "/network/test", strlen("/network/test")) == 0)
+    }
+	else if (strncmp(request, "/network/test", strlen("/network/test")) == 0)
     {
         // 处理网络连接测试请求
         handleNetworkConnectionTest();
     }
+	else if (strncmp(request, "/data/updataAirData", strlen("/data/updataAirData")) == 0)
+    {
+        // 更新数据库中 空调 设备的信息
+        updateAirDeviceStatus(request);
+    }
+	else if (strncmp(request, "/data/updataLightData", strlen("/data/updataLightData")) == 0)
+    {
+        // 更新数据库中 灯 设备的信息
+        updateLightDeviceStatus(request);
+    }
+	else if (strncmp(request, "/data/updataHumidityData", strlen("/data/updataHumidityData")) == 0)
+    {
+        // 更新数据库中 加湿器 设备的信息
+        updateHumidityDeviceStatus(request);
+    }
+	else if (strncmp(request, "/data/time", strlen("/data/time")) == 0)
+    {
+        // 处理设备 日 使用时长分析请求
+        analyzeDataTime(request);
+    }
+	else if (strncmp(request, "/data/airTotalPower", strlen("/data/airtotalPower")) == 0)
+    {
+        // 处理 空调 设备 日 总耗电分析请求
+        analyzeDataAirTotalPower(request);
+    }
+	else if (strncmp(request, "/data/lightTotalPower", strlen("/data/lighttotalPower")) == 0)
+    {
+        // 处理 灯 设备 日 总耗电分析请求
+        analyzeDataLightTotalPower(request);
+    }
+	else if (strncmp(request, "/data/humidityTotalPower", strlen("/data/humiditytotalPower")) == 0)
+    {
+        // 处理 加湿器 设备 日 总耗电分析请求
+        analyzeDataHumidityTotalPower(request);
+    }
+	//else if (strncmp(request, "/data/averagePower", strlen("/data/averagePower")) == 0)
+    //{
+        // 处理设备 每小时 耗电分析请求
+    //    analyzeDataAveragePower(request);
+    //}
     else
     {
         // 请求路径不合法，返回错误响应

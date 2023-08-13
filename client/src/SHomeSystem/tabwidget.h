@@ -6,6 +6,8 @@
 #include <device.h>
 #include <QLabel>
 #include <QtNetwork>
+#include <QMap>
+#include <QSet>
 
 class myTimer {
 public:
@@ -36,6 +38,12 @@ public:
 public slots:
 //    //判断离线/在线，提供不同的展示页面
 //    void onServerConnectionFinished();
+
+    // 声明 sendDataToServer 函数
+    void sendAirDataToServer(Device::State state, double temperature,
+                             QDateTime &timestamp, AirConditioner::AirMode mode);
+    void sendLightDataToServer(Device::State state, QDateTime &timestamp, Light::LightMode mode);
+    void sendHumidityDataToServer(Device::State state, double humidity, QDateTime &timestamp);
 
     // 空调温度变设置槽函数
     void onHostAirEditEditingFinished();
@@ -106,8 +114,10 @@ public:
     Light *secondLight; //次卧灯
 
     //计时器标识 到 myTimer类 map
-    std::map<int, myTimer*> TimerIndex2MyTimerMap;
-    virtual void timeEvent(QTimerEvent*);
+    QMap<int, myTimer*> TimerIndex2MyTimerMap;
+    QSet<int> visSet;
+    virtual void timerEvent(QTimerEvent*);
+
 
 
 private:

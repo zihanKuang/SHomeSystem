@@ -18,7 +18,6 @@ public:
 
 private:
     Ui::LoginView *ui;
-    //UserDB userDB; // UserDB对象作为类成员
 
     // 定义验证用户登录输入信息的函数
     bool validateInput();

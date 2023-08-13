@@ -15,7 +15,6 @@ public:
     bool openDatabase(const QString& databaseName);
     // 关闭数据库
     void closeDatabase();
-
     // 检查用户名是否唯一
     bool isUsernameUnique(const QString& username);
     // 保存用户注册信息
