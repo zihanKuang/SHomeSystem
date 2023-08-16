@@ -1,107 +1,138 @@
-/* server.c - ·şÎñÆ÷¿ò¼ÜºÍÊÂ¼şÑ­»·
+/* server.c - æœåŠ¡å™¨æ¡†æ¶å’Œäº‹ä»¶å¾ªç¯
 
--ÊÂ¼ş¿â³õÊ¼»¯
+-äº‹ä»¶åº“åˆå§‹åŒ–
 
-socket´´½¨
-»Øµ÷º¯Êı¶¨Òå
-ÊÂ¼ş·Ö·¢Ñ­»· */
+socketåˆ›å»º
+å›è°ƒå‡½æ•°å®šä¹‰
+äº‹ä»¶åˆ†å‘å¾ªç¯ */
 
-// ÒıÈëlibeventÍ·ÎÄ¼ş
-#include <event2/event.h>
-#include "api.c" 
-#include "db.c"
+#include "server.h"
 
-// ´¦Àí¿Í»§¶ËHTTPÇëÇó
-void handleRequest(const char* request)
-{
-    // ½âÎö¿Í»§¶ËÇëÇó£¬¸ù¾İÂ·ÓÉÑ¡Ôñ¶ÔÓ¦µÄ´¦Àíº¯Êı
-    if (strncmp(request, "/user/register", strlen("/user/register")) == 0)
-    {
-        // ´¦ÀíÓÃ»§×¢²áÇëÇó
-        handleUserRegistration(request);
+// å¤„ç†å®¢æˆ·ç«¯HTTPè¯·æ±‚  
+enum MHD_Result handleRequest(void* cls,struct MHD_Connection* connection, const char* request, 
+                const char* method, const char* version, const char* upload_data, 
+                size_t* upload_data_size, void** ptr) {
+
+  if (*ptr == NULL) {
+
+    // ç¬¬ä¸€æ¬¡è°ƒç”¨,åˆå§‹åŒ–çŠ¶æ€
+    *ptr = (void*)1;
+    return MHD_YES;
+
+  } else if (*ptr == (void*)1) {
+
+    // è§£æå®¢æˆ·ç«¯è¯·æ±‚,æ ¹æ®è·¯ç”±é€‰æ‹©å¯¹åº”çš„å¤„ç†å‡½æ•°
+
+    if (strncmp(request, "/user/register", strlen("/user/register")) == 0) {
+      
+      // å¤„ç†ç”¨æˆ·æ³¨å†Œè¯·æ±‚
+      handleUserRegister(request,connection);
+
+    } else if (strncmp(request, "/user/login", strlen("/user/login")) == 0) {
+
+      // å¤„ç†ç”¨æˆ·ç™»å½•è¯·æ±‚  
+      handleUserLogin(request,connection);
+
+    } else if (strncmp(request, "/device/control", strlen("/device/control")) == 0) {
+
+      // å¤„ç†è®¾å¤‡æ§åˆ¶è¯·æ±‚
+      //handleDeviceControl(request);
+
+    } else if (strncmp(request, "/weather", strlen("/weather")) == 0) {
+
+      // å¤„ç†è·å–å¤©æ°”æ•°æ®è¯·æ±‚  
+      handleWeatherRequest(connection);
+
+    } else if (strncmp(request, "/network/test", strlen("/network/test")) == 0) {
+
+      // å¤„ç†ç½‘ç»œè¿æ¥æµ‹è¯•è¯·æ±‚
+      handleNetworkConnectionTest(connection);
+
+    } else if (strncmp(request, "/data/updateAirData", strlen("/data/updateAirData")) == 0) {
+
+      // æ›´æ–°æ•°æ®åº“ä¸­ç©ºè°ƒè®¾å¤‡çš„ä¿¡æ¯
+      updateAirDeviceStatus(connection, request,db);
+
+    } else if (strncmp(request, "/data/updateLightData", strlen("/data/updateLightData")) == 0) {
+
+      // æ›´æ–°æ•°æ®åº“ä¸­ç¯è®¾å¤‡çš„ä¿¡æ¯
+      updateLightDeviceStatus(connection, request,db);
+
+    } else if (strncmp(request, "/data/updateHumidityData", strlen("/data/updateHumidityData")) == 0) {
+
+      // æ›´æ–°æ•°æ®åº“ä¸­åŠ æ¹¿å™¨è®¾å¤‡çš„ä¿¡æ¯  
+      updateHumidityDeviceStatus(connection, request,db);
+
+    } else if (strncmp(request, "/data/time", strlen("/data/time")) == 0) {
+
+      // å¤„ç†è®¾å¤‡æ—¥ä½¿ç”¨æ—¶é•¿åˆ†æè¯·æ±‚
+      //analyzeDataTime(connection, request);
+
+    } else if (strncmp(request, "/data/airTotalPower", strlen("/data/airTotalPower")) == 0) {
+
+      // å¤„ç†ç©ºè°ƒè®¾å¤‡æ—¥æ€»è€—ç”µåˆ†æè¯·æ±‚
+      analyzeDataAirTotalPower(connection, request);
+
+    } else if (strncmp(request, "/data/lightTotalPower", strlen("/data/lightTotalPower")) == 0) {
+
+      // å¤„ç†ç¯è®¾å¤‡æ—¥æ€»è€—ç”µåˆ†æè¯·æ±‚ 
+      analyzeDataLightTotalPower(connection, request);
+
+    } else if (strncmp(request, "/data/humidityTotalPower", strlen("/data/humidityTotalPower")) == 0) {
+
+      // å¤„ç†åŠ æ¹¿å™¨è®¾å¤‡æ—¥æ€»è€—ç”µåˆ†æè¯·æ±‚
+      analyzeDataHumidityTotalPower(connection, request);
+
+    } else {
+
+      const char* response = "Invalid request";
+      struct MHD_Response* mhdResponse = MHD_create_response_from_buffer(strlen(response), (void*)response, MHD_RESPMEM_PERSISTENT);
+      MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, mhdResponse);
+      MHD_destroy_response(mhdResponse);
+
+      return MHD_NO;
     }
-    else if (strncmp(request, "/user/login", strlen("/user/login")) == 0)
-    {
-        // ´¦ÀíÓÃ»§µÇÂ¼ÇëÇó
-        handleUserLogin(request);
-    }
-    else if (strncmp(request, "/device/control", strlen("/device/control")) == 0)
-    {
-        // ´¦ÀíÉè±¸¿ØÖÆÇëÇó
-        handleDeviceControl(request);
-    }
-    //else if (strncmp(request, "/user/data/analyze", strlen("/user/data/analyze")) == 0)
-    //{
-    //    // ´¦ÀíÓÃ»§Êı¾İ·ÖÎöÇëÇó
-    //    analyzeUserData(request);
-    //}
-	else if (strncmp(request, "/weather", strlen("/weather")) == 0) {
-        // ´¦Àí»ñÈ¡ÌìÆøÊı¾İÇëÇó
-        handleWeatherRequest();
-    }
-	else if (strncmp(request, "/network/test", strlen("/network/test")) == 0)
-    {
-        // ´¦ÀíÍøÂçÁ¬½Ó²âÊÔÇëÇó
-        handleNetworkConnectionTest();
-    }
-	else if (strncmp(request, "/data/updataAirData", strlen("/data/updataAirData")) == 0)
-    {
-        // ¸üĞÂÊı¾İ¿âÖĞ ¿Õµ÷ Éè±¸µÄĞÅÏ¢
-        updateAirDeviceStatus(request);
-    }
-	else if (strncmp(request, "/data/updataLightData", strlen("/data/updataLightData")) == 0)
-    {
-        // ¸üĞÂÊı¾İ¿âÖĞ µÆ Éè±¸µÄĞÅÏ¢
-        updateLightDeviceStatus(request);
-    }
-	else if (strncmp(request, "/data/updataHumidityData", strlen("/data/updataHumidityData")) == 0)
-    {
-        // ¸üĞÂÊı¾İ¿âÖĞ ¼ÓÊªÆ÷ Éè±¸µÄĞÅÏ¢
-        updateHumidityDeviceStatus(request);
-    }
-	else if (strncmp(request, "/data/time", strlen("/data/time")) == 0)
-    {
-        // ´¦ÀíÉè±¸ ÈÕ Ê¹ÓÃÊ±³¤·ÖÎöÇëÇó
-        analyzeDataTime(request);
-    }
-	else if (strncmp(request, "/data/airTotalPower", strlen("/data/airtotalPower")) == 0)
-    {
-        // ´¦Àí ¿Õµ÷ Éè±¸ ÈÕ ×ÜºÄµç·ÖÎöÇëÇó
-        analyzeDataAirTotalPower(request);
-    }
-	else if (strncmp(request, "/data/lightTotalPower", strlen("/data/lighttotalPower")) == 0)
-    {
-        // ´¦Àí µÆ Éè±¸ ÈÕ ×ÜºÄµç·ÖÎöÇëÇó
-        analyzeDataLightTotalPower(request);
-    }
-	else if (strncmp(request, "/data/humidityTotalPower", strlen("/data/humiditytotalPower")) == 0)
-    {
-        // ´¦Àí ¼ÓÊªÆ÷ Éè±¸ ÈÕ ×ÜºÄµç·ÖÎöÇëÇó
-        analyzeDataHumidityTotalPower(request);
-    }
-	//else if (strncmp(request, "/data/averagePower", strlen("/data/averagePower")) == 0)
-    //{
-        // ´¦ÀíÉè±¸ Ã¿Ğ¡Ê± ºÄµç·ÖÎöÇëÇó
-    //    analyzeDataAveragePower(request);
-    //}
-    else
-    {
-        // ÇëÇóÂ·¾¶²»ºÏ·¨£¬·µ»Ø´íÎóÏìÓ¦
-        handleException("Invalid request");
-    }
+
+  }
+
+  // è¿”å›å¤„ç†æˆåŠŸ
+  return MHD_YES;
+
 }
 
+// å¯åŠ¨æœåŠ¡å™¨  
 void start_server() {
-    // ÊÂ¼ş¿â³õÊ¼»¯
-    struct event_base* base = event_base_new();
+  
+    // åˆå§‹åŒ–æ•°æ®åº“è¿æ¥
+  if (!openDatabase("../../database/SHomedb.db")) {
+    printf("Failed to open database\n");
+    return;
+  }
 
-    // ´´½¨HTTP server
-    struct evhttp* http_server = evhttp_new(base);
-    evhttp_bind_socket(http_server, "0.0.0.0", 8080);
+// åˆå§‹åŒ–libcurl
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    
+  // åˆå§‹åŒ–äº‹ä»¶åº“
+  struct MHD_Daemon* daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION, 
+                        8080, NULL, NULL, &handleRequest, NULL, MHD_OPTION_END);
 
-    // ÉèÖÃÇëÇó´¦Àíº¯Êı
-    evhttp_set_gencb(http_server, handle_request, NULL);
+  if (daemon == NULL) {
+    printf("Failed to start server\n");
+    closeDatabase(); // å…³é—­æ•°æ®åº“è¿æ¥
+    return;
+  }
 
-    // ÊÂ¼ş·Ö·¢Ñ­»·
-    event_base_dispatch(base);
+  // ç­‰å¾…æœåŠ¡å™¨ç»“æŸ
+  printf("Server started on port 8080\n"); 
+  printf("Press Enter to stop the server...\n");
+  getchar(); // ç­‰å¾…ç”¨æˆ·è¾“å…¥å›è½¦
+
+    // åœæ­¢æœåŠ¡å™¨
+    MHD_stop_daemon(daemon); 
+
+    // æ¸…ç†libcurlèµ„æº
+    curl_global_cleanup();
+
+    // å…³é—­æ•°æ®åº“è¿æ¥
+    closeDatabase();
 }

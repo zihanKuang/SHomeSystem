@@ -26,7 +26,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="ControlPage">
     <attribute name="title">
@@ -994,21 +994,6 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QWidget" name="EnvirmentPage">
-    <attribute name="title">
-     <string>环境监测</string>
-    </attribute>
-    <widget class="EnvironmentWidget" name="widget_2" native="true">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>651</width>
-       <height>441</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
    <widget class="QWidget" name="DataAnalyticsPage">
     <attribute name="title">
      <string>数据分析</string>
@@ -1024,6 +1009,36 @@
      </property>
     </widget>
    </widget>
+   <widget class="QWidget" name="loginTab">
+    <attribute name="title">
+     <string>登录页面</string>
+    </attribute>
+    <widget class="LoginView" name="widget_3" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>500</width>
+       <height>500</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="registerTab">
+    <attribute name="title">
+     <string>注册页面</string>
+    </attribute>
+    <widget class="RegisterView" name="widget_2" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>500</width>
+       <height>500</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
   </widget>
  </widget>
  <customwidgets>
@@ -1034,9 +1049,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>EnvironmentWidget</class>
+   <class>LoginView</class>
    <extends>QWidget</extends>
-   <header>environmentwidget.h</header>
+   <header>loginview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RegisterView</class>
+   <extends>QWidget</extends>
+   <header>registerview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

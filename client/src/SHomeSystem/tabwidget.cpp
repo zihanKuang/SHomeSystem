@@ -1,7 +1,6 @@
 #include "tabwidget.h"
 #include "ui_tabwidget.h"
 
-
 TabWidget::TabWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TabWidget)
@@ -56,14 +55,14 @@ TabWidget::TabWidget(QWidget *parent) :
     ui->livingLightMode->addItems(LightModeOptions);
     ui->secondLightMode->addItems(LightModeOptions);
 
-//    // 初始化网络访问管理器
-//    networkAccessManager = new QNetworkAccessManager(this);
-//    // 测试与服务器的连接状态
-//    QNetworkRequest request(QUrl("http://127.0.0.1:8080")); // 修改为您的服务器地址
-//    QNetworkReply* reply = networkAccessManager->get(request);
+    // 初始化网络访问管理器
+    networkAccessManager = new QNetworkAccessManager(this);
+    // 测试与服务器的连接状态
+    QNetworkRequest request(QUrl("http://127.0.0.1:8080")); // 修改为您的服务器地址
+    QNetworkReply* reply = networkAccessManager->get(request);
 
-//    // 连接请求完成信号到槽函数
-//    connect(reply, &QNetworkReply::finished, this, &TabWidget::onServerConnectionFinished);
+    // 连接请求完成信号到槽函数
+    connect(reply, &QNetworkReply::finished, this, &TabWidget::onServerConnectionFinished);
 
 
     // 当tabwidget的页面的index切到1时，客户端就会像服务端发送耗电量计算的请求
@@ -92,14 +91,6 @@ TabWidget::TabWidget(QWidget *parent) :
                 this, &TabWidget::onHostAirTimeButtonClicked);
     connect(ui->secondAirTimeBtn, &QPushButton::clicked,
                 this, &TabWidget::onSecondAirTimeButtonClicked);
-
-//    connect(ui->hostAirTime, &QTimeEdit::timeChanged,
-//            this, &TabWidget::onHostAirTimerTimeChanged);
-//    connect(ui->livingAirTime, &QTimeEdit::timeChanged,
-//            this, &TabWidget::onLivingAirTimerTimeChanged);
-//    connect(ui->secondAirTime, &QTimeEdit::timeChanged,
-//            this, &TabWidget::onSecondAirTimerTimeChanged);
-
 
     //空调开关
     connect(ui->hostAirBtn, &QPushButton::clicked,
@@ -143,47 +134,58 @@ TabWidget::TabWidget(QWidget *parent) :
 
 //如果有网络连接，则启用环境监测和数据分析页面。
 //如果没有网络连接，则禁用这两个页面，并将QTabWidget切换到控制页面
-//void TabWidget::onServerConnectionFinished()
-//{
-//    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
-//    if (reply) {
-//        if (reply->error() == QNetworkReply::NoError) {
-//        // 连上服务器，有网络
-//        // 启用需要网络连接的功能
-//        ui->tabWidget->setTabEnabled(1, true); // EnviromentPage
-//        ui->tabWidget->setTabEnabled(2, true); // DataAnalyticsPage
-//    } else {
-//        // 没有网络连接
-//        // 禁用需要网络连接的功能
-//        ui->tabWidget->setTabEnabled(1, false);
-//        ui->tabWidget->setTabEnabled(2, false);
-//        ui->tabWidget->setCurrentIndex(0); // 切换到第一页
-//    }
-//        // 释放资源
-//        reply->deleteLater();
-//    }
-//}
+void TabWidget::onServerConnectionFinished()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+
+    if (reply->error() == QNetworkReply::NoError)
+    {
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200)
+        {
+        ui->tabWidget->setTabEnabled(1, true);
+        ui->tabWidget->setTabEnabled(2, true);
+        ui->tabWidget->setTabEnabled(3, true);
+    } else {
+        // 没有网络连接
+        // 禁用需要网络连接的功能
+        ui->tabWidget->setTabEnabled(1, false);
+        ui->tabWidget->setTabEnabled(2, false);
+        ui->tabWidget->setTabEnabled(3, false);
+        ui->tabWidget->setCurrentIndex(0); // 切换到第一页
+    }
+}
+        // 释放资源
+        reply->deleteLater();
+}
 
 // 处理页面切换信号的槽函数
 void TabWidget::handleTabChange(int newIndex)
 {
     if (newIndex == 1) {
-        // 切换到索引为1的页面，发送相关请求
-        sendDeviceTotalPowerRequest("http://your-server-url.com/data/airTotalPower");
-        sendDeviceTotalPowerRequest("http://your-server-url.com/data/lightTotalPower");
-        sendDeviceTotalPowerRequest("http://your-server-url.com/data/humidityTotalPower");
-    }
-    if (newIndex == 2) {
-        //室内温度和天气折线图处理
+        sendDeviceTotalPowerRequest("http://127.0.0.1:8080/data/airTotalPower", "hostAir");
+        sendDeviceTotalPowerRequest("http://127.0.0.1:8080/data/airTotalPower", "livingAir");
+        sendDeviceTotalPowerRequest("http://127.0.0.1:8080/data/airTotalPower", "seocondAir");
+
+        sendDeviceTotalPowerRequest("http://127.0.0.1:8080/data/lightTotalPower", "livingLight");
+        sendDeviceTotalPowerRequest("http://127.0.0.1:8080/data/lightTotalPower", "hostLight");
+        sendDeviceTotalPowerRequest("http://127.0.0.1:8080/data/lightTotalPower", "secondLight");
+
+        sendDeviceTotalPowerRequest("http://127.0.0.1:8080/data/humidityTotalPower", "livingHumidity");
+        sendDeviceTotalPowerRequest("http://127.0.0.1:8080/data/humidityTotalPower", "hostHumidity");
     }
 }
 
 // 发送设备耗电量请求的函数
-void TabWidget::sendDeviceTotalPowerRequest(const QString& url)
+void TabWidget::sendDeviceTotalPowerRequest(const QString& url, const QString& deviceName)
 {
     QNetworkRequest request(url);
+
+    // 在请求中添加设备标识
+    QByteArray postData;
+    postData.append("device=" + deviceName.toUtf8());
+
     QNetworkAccessManager manager;
-    QNetworkReply* reply = manager.get(request);
+    QNetworkReply* reply = manager.post(request, postData);
 
     QObject::connect(reply, &QNetworkReply::finished, [=]() {
         if (reply->error() == QNetworkReply::NoError) {
@@ -197,13 +199,10 @@ void TabWidget::sendDeviceTotalPowerRequest(const QString& url)
                 if (jsonObject.contains("totalPower")) {
                     double totalPower = jsonObject["totalPower"].toDouble();
 
-                    // 在这里进行数据渲染或其他操作
-                    //
-                    //未实现
-                    processDeviceTotalPowerResponse(response);
+                    // 发射信号，将数据传递给 DataWidget 类
+                    emit dataReceived(deviceName, totalPower);
                 }
             }
-
         } else {
             // 处理错误
             qDebug() << "Error: " << reply->errorString();
@@ -213,20 +212,24 @@ void TabWidget::sendDeviceTotalPowerRequest(const QString& url)
     });
 }
 
-void TabWidget::sendAirDataToServer(Device::State state, double temperature,
-                                    QDateTime &timestamp, AirConditioner::AirMode mode)
+void TabWidget::sendAirDataToServer(Device::State state, double temperature,QDateTime &timestamp,
+                                            AirConditioner::AirMode mode,const QString& deviceName)
 {
     // 构建HTTP请求，将空调的设备状态、温度、定时类型和模式等数据传递给服务器
     // 请根据实际情况修改服务器URL和参数
-    QUrl url("http://your-server-url.com/update_air_device_status");
+    QUrl url("http://127.0.0.1:8080/data/updateAirData/");
     QUrlQuery query;
 
-    query.addQueryItem("state", state == Device::State::ON ? "on" : "off");
-    query.addQueryItem("temperature", QString::number(temperature));
+    query.addQueryItem("statusValue", state == Device::State::ON ? "on" : "off");
+    query.addQueryItem("feature", QString::number(temperature));
     query.addQueryItem("timestamp", timestamp.toString(Qt::ISODate));
     query.addQueryItem("mode", QString::number(static_cast<int>(mode))); // 或者发送模式的枚举值
+    query.addQueryItem("deviceName", deviceName);
 
     url.setQuery(query);
+
+    // 打印构建的完整 URL
+    qDebug() << "Sending URL:" << url.toString();
 
     QNetworkRequest request(url);
     QNetworkAccessManager manager;
@@ -263,7 +266,7 @@ void TabWidget::sendLightDataToServer(Device::State state, QDateTime &timestamp,
 {
     // 构建HTTP请求，将灯光的设备状态、定时类型和模式等数据传递给服务器
     // 请根据实际情况修改服务器URL和参数
-    QUrl url("http://your-server-url.com/update_light_device_status");
+    QUrl url("http://127.0.0.1:8080/data/updateLightData/");
     QUrlQuery query;
 
     query.addQueryItem("state", state == Device::State::ON ? "on" : "off");
@@ -307,11 +310,11 @@ void TabWidget::sendHumidityDataToServer(Device::State state, double humidity, Q
 {
     // 构建HTTP请求，将加湿器的设备状态、湿度、定时类型等数据传递给服务器
     // 请根据实际情况修改服务器URL和参数
-    QUrl url("http://your-server-url.com/update_humidity_device_status");
+    QUrl url("http://127.0.0.1:8080/data/updateHumidityData/");
     QUrlQuery query;
 
     query.addQueryItem("state", state == Device::State::ON ? "on" : "off");
-    query.addQueryItem("humidity", QString::number(humidity));
+    query.addQueryItem("feature", QString::number(humidity));
     query.addQueryItem("timestamp", timestamp.toString(Qt::ISODate));
 
     url.setQuery(query);
@@ -351,6 +354,8 @@ void TabWidget::sendHumidityDataToServer(Device::State state, double humidity, Q
 // 更新主卧空调的 QLabel
 void TabWidget::updateHostAirStatusLabel()
 {
+    //执行器
+    Executor executor;
     QString statusText;
     if (hostAir->getState() == Device::State::ON) {
         statusText = "设备状态：开启\n"
@@ -363,6 +368,10 @@ void TabWidget::updateHostAirStatusLabel()
             QString::number(hostAir->getTimerMinutes()) + " 分钟后关闭\n";
         }
         statusText += QString("模式：%1\n").arg(hostAir->modeToString(hostAir->getMode()));
+
+        // 调用执行器函数模拟发送命令给空调
+        executor.sendAirConditionerCommand("主卧空调", hostAir->getTemperature(),
+                                           hostAir->getMode(), true, true);
     } else {
         statusText = "设备状态：关闭\n";
         if(hostAir->getTimerType() == Device::TimerType::NOT_SET) {
@@ -372,6 +381,10 @@ void TabWidget::updateHostAirStatusLabel()
             statusText += "定时：" + QString::number(hostAir->getTimerHours()) + " 小时 " +
             QString::number(hostAir->getTimerMinutes()) + " 分钟后开启\n";
         }
+
+        // 调用执行器函数模拟发送命令给空调
+        executor.sendAirConditionerCommand("主卧空调", hostAir->getTemperature(),
+                                           hostAir->getMode(), false, false);
     }
     ui->hostAirShow->setText(statusText);
 
@@ -384,6 +397,8 @@ void TabWidget::updateHostAirStatusLabel()
 
 void TabWidget::updateLivingAirStatusLabel()
 {
+    //执行器
+    Executor executor;
     QString statusText;
     if (livingAir->getState() == Device::State::ON) {
         statusText = "设备状态：开启\n"
@@ -396,6 +411,10 @@ void TabWidget::updateLivingAirStatusLabel()
             QString::number(livingAir->getTimerMinutes()) + " 分钟后关闭\n";
         }
         statusText += QString("模式：%1\n").arg(livingAir->modeToString(livingAir->getMode()));
+
+        // 调用执行器函数模拟发送命令给空调
+        executor.sendAirConditionerCommand("客厅空调", livingAir->getTemperature(),
+                                           livingAir->getMode(), true, true);
     } else {
         statusText = "设备状态：关闭\n";
         if(livingAir->getTimerType() == Device::TimerType::NOT_SET) {
@@ -405,6 +424,10 @@ void TabWidget::updateLivingAirStatusLabel()
             statusText += "定时：" + QString::number(livingAir->getTimerHours()) + " 小时 " +
             QString::number(livingAir->getTimerMinutes()) + " 分钟后开启\n";
         }
+
+        // 调用执行器函数模拟发送命令给空调
+        executor.sendAirConditionerCommand("客厅空调", livingAir->getTemperature(),
+                                           livingAir->getMode(), false, false);
     }
     ui->livingAirShow->setText(statusText);
 
@@ -417,6 +440,8 @@ void TabWidget::updateLivingAirStatusLabel()
 
 void TabWidget::updateSecondAirStatusLabel()
 {
+    //执行器
+    Executor executor;
     QString statusText;
     if (secondAir->getState() == Device::State::ON) {
         statusText = "设备状态：开启\n"
@@ -429,6 +454,10 @@ void TabWidget::updateSecondAirStatusLabel()
             QString::number(secondAir->getTimerMinutes()) + " 分钟后关闭\n";
         }
         statusText += QString("模式：%1\n").arg(secondAir->modeToString(secondAir->getMode()));
+
+        // 调用执行器函数模拟发送命令给空调
+        executor.sendAirConditionerCommand("次卧空调", secondAir->getTemperature(),
+                                           secondAir->getMode(), true, true);
     } else {
         statusText = "设备状态：关闭\n";
         if(secondAir->getTimerType() == Device::TimerType::NOT_SET) {
@@ -438,6 +467,10 @@ void TabWidget::updateSecondAirStatusLabel()
             statusText += "定时：" + QString::number(secondAir->getTimerHours()) + " 小时 " +
             QString::number(secondAir->getTimerMinutes()) + " 分钟后开启\n";
         }
+
+        // 调用执行器函数模拟发送命令给空调
+        executor.sendAirConditionerCommand("次卧空调", secondAir->getTemperature(),
+                                           secondAir->getMode(), false, false);
     }
     ui->secondAirShow->setText(statusText);
     // 获取当前时间戳
@@ -531,63 +564,6 @@ void TabWidget::timerEvent(QTimerEvent* event) {
     }
 }
 
-
-//void TabWidget::onHostAirTimerTimeChanged(const QTime &time)
-//{
-//    if (!time.isValid()) {
-//        return; // Invalid time, do nothing
-//    }
-
-//    int hours = time.hour();
-//    int minutes = time.minute();
-
-//    Device::State airState = hostAir->getState();
-
-//    if (airState == Device::State::ON) {
-//        hostAir->setTimer(hours, minutes, Device::TimerType::OFF);
-//    } else {
-//        hostAir->setTimer(hours, minutes, Device::TimerType::ON);
-//    }
-//    updateHostAirStatusLabel();
-//}
-
-//void TabWidget::onLivingAirTimerTimeChanged(const QTime &time)
-//{
-//    if (!time.isValid()) {
-//        return; // Invalid time, do nothing
-//    }
-
-//    int hours = time.hour();
-//    int minutes = time.minute();
-//    Device::State airState = livingAir->getState();
-
-//    if (airState == Device::State::ON) {
-//        livingAir->setTimer(hours, minutes, Device::TimerType::OFF);
-//    } else {
-//        livingAir->setTimer(hours, minutes, Device::TimerType::ON);
-//    }
-//    updateLivingAirStatusLabel();
-//}
-//void TabWidget::onSecondAirTimerTimeChanged(const QTime &time)
-//{
-//    if (!time.isValid()) {
-//        return; // Invalid time, do nothing
-//    }
-
-//    int hours = time.hour();
-//    int minutes = time.minute();
-//    Device::State airState = secondAir->getState();
-
-//    if (airState == Device::State::ON) {
-//        secondAir->setTimer(hours, minutes, Device::TimerType::OFF);
-//    } else {
-//        secondAir->setTimer(hours, minutes, Device::TimerType::ON);
-//    }
-
-//    updateSecondAirStatusLabel();
-//}
-
-
 // 空调开关按钮点击槽函数
 void TabWidget::onHostAirPowerButtonClicked()
 {
@@ -627,14 +603,23 @@ void TabWidget::onSecondAirModeChanged(int index)
 
 // 更新主卧加湿器状态Label
 void TabWidget::updateHostHumidityStatusLabel() {
+    //执行器
+    Executor executor;
     QString statusText = "状态：";
     if (hostHumidity->getState() == Device::State::ON) {
         statusText += "开启";
         statusText += "，湿度：" + QString::number(hostHumidity->getHumidity()) + "%";
         ui->hostHumidityShow->setText(statusText);
+
+         // 调用执行器函数模拟发送命令给加湿器
+        executor.sendHumidityCommand("主卧加湿器", hostHumidity->getHumidity(), true);
+
     } else {
         statusText += "关闭";
         ui->hostHumidityShow->setText(statusText);
+
+        // 调用执行器函数模拟发送命令给加湿器
+        executor.sendHumidityCommand("主卧加湿器", 0.0, false);
     }
     ui->hostHumidityShow->setText(statusText);
 
@@ -647,14 +632,22 @@ void TabWidget::updateHostHumidityStatusLabel() {
 
 // 更新客厅加湿器状态Label
 void TabWidget::updateLivingHumidityStatusLabel() {
+    //执行器
+    Executor executor;
     QString statusText = "状态：";
     if (livingHumidity->getState() == Device::State::ON) {
         statusText += "开启";
         statusText += "，湿度：" + QString::number(livingHumidity->getHumidity()) + "%";
         ui->livingHumidityShow->setText(statusText);
+
+        // 调用执行器函数模拟发送命令给加湿器
+         executor.sendHumidityCommand("客厅加湿器", livingHumidity->getHumidity(), true);
     } else {
         statusText += "关闭";
         ui->livingHumidityShow->setText(statusText);
+
+        // 调用执行器函数模拟发送命令给加湿器
+        executor.sendHumidityCommand("客厅加湿器", 0.0, false);
     }
     ui->livingHumidityShow->setText(statusText);
 
@@ -666,6 +659,7 @@ void TabWidget::updateLivingHumidityStatusLabel() {
 
 // 加湿器开关按钮点击槽函数
 void TabWidget::onHostHumidityBtnClicked() {
+
     if (hostHumidity->getState() == Device::State::ON) {
         hostHumidity->turnOff(); // 关闭加湿器
         ui->hostHumiditySlider->setValue(0); // 设置湿度滑动条为0
@@ -728,6 +722,8 @@ void TabWidget::onLivingHumiditySpinChanged(int value) {
 //灯
 void TabWidget::updateHostLightStatusLabel()
 {
+    //执行器
+    Executor executor;
     QString hostLightStatusText;
     if (hostLight->getState() == Device::State::ON) {
         hostLightStatusText = "设备状态：开启\n";
@@ -739,6 +735,9 @@ void TabWidget::updateHostLightStatusLabel()
                                    QString::number(hostLight->getTimerMinutes()) + " 分钟后关闭\n";
         }
         hostLightStatusText += QString("模式：%1\n").arg(hostLight->modeToString(hostLight->getMode()));
+
+        // 调用执行器函数模拟发送命令给灯
+        executor.sendLightCommand("主卧灯", hostLight->getMode(), true, true);
     } else {
         hostLightStatusText = "设备状态：关闭\n";
         if(hostLight->getTimerType() == Device::TimerType::NOT_SET) {
@@ -748,6 +747,9 @@ void TabWidget::updateHostLightStatusLabel()
             hostLightStatusText += "定时：" + QString::number(hostLight->getTimerHours()) + " 小时 " +
                                    QString::number(hostLight->getTimerMinutes()) + " 分钟后开启\n";
         }
+
+        // 调用执行器函数模拟发送命令给灯
+        executor.sendLightCommand("主卧灯", Light::LightMode::WHITE, false, false);
     }
     ui->hostLightShow->setText(hostLightStatusText);
 
@@ -760,6 +762,8 @@ void TabWidget::updateHostLightStatusLabel()
 
 void TabWidget::updateLivingLightStatusLabel()
 {
+    //执行器
+    Executor executor;
     QString livingLightStatusText;
     if (livingLight->getState() == Device::State::ON) {
         livingLightStatusText = "设备状态：开启\n";
@@ -771,6 +775,9 @@ void TabWidget::updateLivingLightStatusLabel()
                                    QString::number(livingLight->getTimerMinutes()) + " 分钟后关闭\n";
         }
         livingLightStatusText += QString("模式：%1\n").arg(livingLight->modeToString(livingLight->getMode()));
+
+        // 调用执行器函数模拟发送命令给灯
+        executor.sendLightCommand("客厅灯", livingLight->getMode(), true, true);
     } else {
         livingLightStatusText = "设备状态：关闭\n";
         if(livingLight->getTimerType() == Device::TimerType::NOT_SET) {
@@ -780,6 +787,9 @@ void TabWidget::updateLivingLightStatusLabel()
             livingLightStatusText += "定时：" + QString::number(livingLight->getTimerHours()) + " 小时 " +
                                    QString::number(livingLight->getTimerMinutes()) + " 分钟后开启\n";
         }
+
+        // 调用执行器函数模拟发送命令给灯
+        executor.sendLightCommand("客厅灯", Light::LightMode::WHITE, false, false);
     }
     ui->livingLightShow->setText(livingLightStatusText);
 
@@ -792,6 +802,8 @@ void TabWidget::updateLivingLightStatusLabel()
 
 void TabWidget::updateSecondLightStatusLabel()
 {
+    //执行器
+    Executor executor;
     QString secondLightStatusText;
     if (secondLight->getState() == Device::State::ON) {
         secondLightStatusText = "设备状态：开启\n";
@@ -803,6 +815,9 @@ void TabWidget::updateSecondLightStatusLabel()
                                    QString::number(secondLight->getTimerMinutes()) + " 分钟后关闭\n";
         }
         secondLightStatusText += QString("模式：%1\n").arg(secondLight->modeToString(secondLight->getMode()));
+
+        // 调用执行器函数模拟发送命令给灯
+        executor.sendLightCommand("次卧灯", secondLight->getMode(), true, true);
     } else {
         secondLightStatusText = "设备状态：关闭\n";
         if(secondLight->getTimerType() == Device::TimerType::NOT_SET) {
@@ -812,6 +827,9 @@ void TabWidget::updateSecondLightStatusLabel()
             secondLightStatusText += "定时：" + QString::number(secondLight->getTimerHours()) + " 小时 " +
                                    QString::number(secondLight->getTimerMinutes()) + " 分钟后开启\n";
         }
+
+        // 调用执行器函数模拟发送命令给灯
+        executor.sendLightCommand("客厅灯", Light::LightMode::WHITE, false, false);
     }
     ui->secondLightShow->setText(secondLightStatusText);
 

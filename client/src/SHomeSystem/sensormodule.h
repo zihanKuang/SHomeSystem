@@ -2,6 +2,8 @@
 #define SENSORMODULE_H
 
 #include <QObject>
+#include <executor.h>
+#include <QTimer>
 
 class SensorModule : public QObject
 {
@@ -9,17 +11,15 @@ class SensorModule : public QObject
 public:
     explicit SensorModule(QObject *parent = nullptr);
 
-    void collectTemperatureData();
-    void collectHumidityData();
-    void collectBrightnessData();
+    void performAutoControl(); // 自动控制函数
 
 private:
+    QPair<double, double> temperatureRange;
+    QPair<double, double> humidityRange;
+    QPair<double, double> brightnessRange;
+
+    double readSensorData(const QPair<double, double>& range);
     double generateRandomDouble(double min, double max);
-    double readTemperatureSensor();
-    double readHumiditySensor();
-    double readBrightnessSensor();
-    double convertToDigital(double analogData);
-    void sendDataToServer(double temperature, double humidity, double brightness);
 };
 
 #endif // SENSORMODULE_H

@@ -1,7 +1,5 @@
 #include "loginview.h"
 #include "ui_loginview.h"
-#include <QtNetwork>
-#include <QMessageBox>
 
 
 LoginView::LoginView(QWidget *parent) :
@@ -43,64 +41,63 @@ void LoginView::callLoginAPI(const QString& username, const QString& password)
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 
     // 构建HTTP请求
-    QNetworkRequest request(QUrl("http://127.0.0.1:8080/user/login"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    QUrl url("http://127.0.0.1:8080/user/login");
+    QUrlQuery query;
+    query.addQueryItem("username", username);
+    query.addQueryItem("password", password);
+    url.setQuery(query);
 
-    // 构建请求参数
-    QByteArray postData;
-    postData.append("username=" + username);
-    postData.append("&password=" + password);
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    // 发送HTTP POST请求
-    QNetworkReply *reply = manager->post(request, postData);
+    // 发送HTTP GET请求（将数据作为URL参数）
+    QNetworkReply *reply = manager->get(request);
 
     // 连接信号和槽，处理服务器的响应
-    connect(reply, &QNetworkReply::finished, this, [=]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+
         if (reply->error() == QNetworkReply::NoError) {
+
             // 请求成功，解析服务器响应的JSON数据并进行处理
             QByteArray responseData = reply->readAll();
-            // 解析JSON数据并处理
-            // 例如检查登录是否成功，处理用户信息等
-
-            // 假设服务器返回的JSON数据格式如下：
-            // {
-            //     "success": true,
-            //     "message": "登录成功",
-            //     "data": {
-            //         // 用户信息等数据
-            //     }
-            // }
-
             QJsonDocument jsonResponse = QJsonDocument::fromJson(responseData);
-            QJsonObject jsonObject = jsonResponse.object();
-            bool isSuccess = jsonObject.value("success").toBool();
-            QString message = jsonObject.value("message").toString();
 
-            if (isSuccess) {
-                // 登录成功
-                qDebug() << "Login successful:" << message;
-                // 在这里进行登录成功后的相关处理，例如显示登录成功提示，更新用户信息等
-                // emit loginSuccessful();
-                QMessageBox::information(this, "登录成功", message);
-            } else {
-                // 登录失败
-                qDebug() << "Login failed:" << message;
-                // 在这里进行登录失败后的相关处理，例如显示登录失败提示
-                QMessageBox::warning(this, "登录失败", message);
+            if (!jsonResponse.isNull() && jsonResponse.isObject()) {
+                QJsonObject jsonObject = jsonResponse.object();
+                bool isSuccess = jsonObject.value("success").toBool();
+                QString message = jsonObject.value("message").toString();
+
+                if (isSuccess) {
+                    // 登录成功
+                    qDebug() << "Login successful:" << message;
+                    QMessageBox::information(this, "Login successfully", "登陆成功！");
+                } else {
+                    // 登录失败
+                    qDebug() << "Login failed:" << message;
+                    QMessageBox::warning(this, "Login failed", "登陆失败！");
+                }
             }
         } else {
             // 请求失败
             qDebug() << "Login failed:" << reply->errorString();
             // 在这里进行请求失败后的相关处理，例如显示错误提示
-            QMessageBox::warning(this, "登录失败", "网络错误，请稍后再试！");
+            QMessageBox::warning(this, "Login failed", "网络错误");
         }
+
         reply->deleteLater();
     });
 }
 
-
 void LoginView::onLoginButtonClicked()
 {
+    // 首先验证输入是否有效
+    if (!validateInput())
+    {
+        // 输入无效，显示错误信息给用户
+        QMessageBox::warning(this, "错误", "请输入有效的用户名和密码！");
+        return;
+    }
+
     // 获取用户名和密码
     QString username = ui->nameEdit->text().trimmed();
     QString password = ui->pwdEdit->text();
@@ -108,3 +105,4 @@ void LoginView::onLoginButtonClicked()
     // 调用登录接口进行用户验证
     callLoginAPI(username, password);
 }
+

@@ -2,80 +2,66 @@
 #include <QDebug>
 #include <cstdlib>
 #include <ctime>
+#include <QTime>
 
 SensorModule::SensorModule(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      temperatureRange(15, 38),
+      humidityRange(30, 80),
+      brightnessRange(100, 200)
 {
     // 使用随机数种子初始化
     std::srand(std::time(nullptr));
+
+    // 设置定时器，定时采集数据并进行自动控制
+    QTimer* autoControlTimer = new QTimer(this);
+    connect(autoControlTimer, &QTimer::timeout, this, &SensorModule::performAutoControl);
+    autoControlTimer->start(30*60*1000); // 每30min执行一次
 }
 
-void SensorModule::collectTemperatureData()
+void SensorModule::performAutoControl()
 {
-    double temperature = generateRandomDouble(20, 30);
-    qDebug() << "温度数据采集:" << temperature;
+    //全屋一起监控，不区分房间了
+    double temperature = readSensorData(temperatureRange);
+    double humidity = readSensorData(humidityRange);
+    double brightness = readSensorData(brightnessRange);
 
-    // 实际应用中，这里可以调用发送数据到服务器的函数
-    // sendDataToServer(temperature, 0, 0);
+    Executor executor;
+    // 空调自动控制逻辑示例
+    if (temperature > 32) {
+        executor.sendAirConditionerCommand("主卧空调", 26, AirConditioner::AirMode::COOLING, true, true);
+    } else if (temperature < 20) {
+        executor.sendAirConditionerCommand("主卧空调", 26, AirConditioner::AirMode::HEATING, true, true);
+    }
+
+    // 灯自动控制逻辑示例
+    if (brightness < 150) {
+        executor.sendLightCommand("客厅灯", Light::LightMode::WHITE, true, true);
+    }
+
+    // 加湿器自动控制逻辑示例
+    if (humidity < 50) {
+        executor.sendHumidityCommand("加湿器", 60, true);
+    } else if (humidity > 70) {
+        executor.sendHumidityCommand("加湿器", 40, true);
+    }
+
+    // 根据时间自动控制灯
+    QTime currentTime = QTime::currentTime();
+    if (currentTime >= QTime(18, 0) || currentTime <= QTime(6, 0)) {
+        executor.sendLightCommand("客厅灯", Light::LightMode::WHITE, true, true);
+    } else {
+        executor.sendLightCommand("客厅灯", Light::LightMode::WHITE, false, true);
+    }
 }
 
-void SensorModule::collectHumidityData()
+double SensorModule::readSensorData(const QPair<double, double>& range)
 {
-    double humidity = generateRandomDouble(40, 60);
-    qDebug() << "湿度数据采集:" << humidity;
-
-    // 实际应用中，这里可以调用发送数据到服务器的函数
-    // sendDataToServer(0, humidity, 0);
-}
-
-void SensorModule::collectBrightnessData()
-{
-    double brightness = generateRandomDouble(100, 200);
-    qDebug() << "亮度数据采集:" << brightness;
-
-    // 实际应用中，这里可以调用发送数据到服务器的函数
-    // sendDataToServer(0, 0, brightness);
+    return generateRandomDouble(range.first, range.second);
 }
 
 double SensorModule::generateRandomDouble(double min, double max)
 {
-    // 生成min和max之间的随机实数
     return (std::rand() / (double)RAND_MAX) * (max - min) + min;
 }
 
-double SensorModule::readTemperatureSensor()
-{
-    // 在实际应用中，您应该从温度传感器中读取数据
-    // 为了演示目的，我们使用介于20到30之间的随机值
-    return generateRandomDouble(20, 30);
-}
-
-double SensorModule::readHumiditySensor()
-{
-    // 在实际应用中，您应该从湿度传感器中读取数据
-    // 为了演示目的，我们使用介于40到60之间的随机值
-    return generateRandomDouble(40, 60);
-}
-
-double SensorModule::readBrightnessSensor()
-{
-    // 在实际应用中，您应该从光敏传感器中读取数据
-    // 为了演示目的，我们使用介于100到200之间的随机值
-    return generateRandomDouble(100, 200);
-}
-
-double SensorModule::convertToDigital(double analogData)
-{
-    // 在实际应用中，如果需要，您可以执行模拟到数字的转换
-    // 为了演示目的，我们直接返回模拟数据作为数字数据
-    return analogData;
-}
-
-void SensorModule::sendDataToServer(double temperature, double humidity, double brightness)
-{
-    // 在实际应用中，您应该通过网络连接将数据发送到服务器
-    // 在这里，我们简单地打印数据作为演示
-    qDebug() << "发送数据到服务器 - 温度:" << temperature
-             << " 湿度:" << humidity
-             << " 亮度:" << brightness;
-}

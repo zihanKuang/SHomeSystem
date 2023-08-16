@@ -1,5 +1,5 @@
-#ifndef STACKEDWIDGET_H
-#define STACKEDWIDGET_H
+#ifndef TABWIDGET_H
+#define TABWIDGET_H
 
 #include <QWidget>
 #include <QChart>
@@ -8,6 +8,7 @@
 #include <QtNetwork>
 #include <QMap>
 #include <QSet>
+#include "executor.h"
 
 class myTimer {
 public:
@@ -36,8 +37,13 @@ public:
     ~TabWidget();
 
 public slots:
-//    //判断离线/在线，提供不同的展示页面
-//    void onServerConnectionFinished();
+    //判断离线/在线，提供不同的展示页面
+    void onServerConnectionFinished();
+
+    // 处理页面切换信号的槽函数
+    void handleTabChange(int);
+    // 发送请求请求耗电量
+    void sendDeviceTotalPowerRequest(const QString& url, const QString& deviceName);
 
     // 声明 sendDataToServer 函数
     void sendAirDataToServer(Device::State state, double temperature,
@@ -54,10 +60,6 @@ public slots:
     void onLivingAirTimeButtonClicked();
     void onHostAirTimeButtonClicked();
     void onSecondAirTimeButtonClicked();
-
-//    void onHostAirTimerTimeChanged(const QTime &time);
-//    void onLivingAirTimerTimeChanged(const QTime &time);
-//    void onSecondAirTimerTimeChanged(const QTime &time);
 
     // 空调开关按钮槽函数
     void onHostAirPowerButtonClicked();
@@ -100,7 +102,7 @@ public slots:
 
 public:
 
-    //QNetworkAccessManager *networkAccessManager;
+    QNetworkAccessManager *networkAccessManager;
 
     AirConditioner *hostAir;//主卧空调
     AirConditioner *livingAir;//客厅空调
@@ -119,9 +121,12 @@ public:
     virtual void timerEvent(QTimerEvent*);
 
 
-
 private:
     Ui::TabWidget *ui;
+
+signals:
+    void dataReceived(const QString& deviceName, double totalPower);
+
 };
 
-#endif // STACKEDWIDGET_H
+#endif // TABWIDGET_H

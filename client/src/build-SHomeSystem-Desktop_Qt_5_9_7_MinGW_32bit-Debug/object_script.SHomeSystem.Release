@@ -4,7 +4,6 @@ INPUT(
 ./release\weatherwidget.o
 ./release\tabwidget.o
 ./release\datawidget.o
-./release\environmentwidget.o
 ./release\registerview.o
 ./release\loginview.o
 ./release\sensormodule.o
@@ -14,7 +13,6 @@ INPUT(
 ./release\moc_weatherwidget.o
 ./release\moc_tabwidget.o
 ./release\moc_datawidget.o
-./release\moc_environmentwidget.o
 ./release\moc_registerview.o
 ./release\moc_loginview.o
 ./release\moc_sensormodule.o

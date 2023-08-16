@@ -2,7 +2,10 @@
 #define REGISTERVIEW_H
 
 #include <QWidget>
-#include "userdb.h"
+#include <QtDebug>
+#include <QMessageBox>
+#include <QtNetwork>
+
 
 namespace Ui {
 class RegisterView;
@@ -21,7 +24,6 @@ private slots:
 
 private:
     Ui::RegisterView *ui;
-    //UserDB userDB; // UserDB对象作为类成员
 
     // validate input
     bool validateInput();

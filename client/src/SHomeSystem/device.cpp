@@ -27,30 +27,6 @@ void Device::togglePower() {
     }
 }
 
-//void Device::updateWeeklyStats(int week, double powerConsumption, int usageTime) {
-//    WeeklyStat weeklyData;
-//    weeklyData.week = week;
-//    weeklyData.totalPower = powerConsumption;
-//    weeklyData.totalTime = usageTime;
-//    weeklyStats.push_back(weeklyData);
-//}
-
-//double Device::calculateAveragePower() {
-//    double totalPower = 0.0;
-//    int totalTime = 0;
-
-//    for (const WeeklyStat& weeklyData : weeklyStats) {
-//        totalPower += weeklyData.totalPower;
-//        totalTime += weeklyData.totalTime;
-//    }
-
-//    if (totalTime > 0) {
-//        return totalPower / totalTime;
-//    } else {
-//        return 0.0;
-//    }
-//}
-
 //空调
 //空调
 //空调

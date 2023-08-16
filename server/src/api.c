@@ -1,11 +1,6 @@
 // api.c - 通信接口类的实现
 
 #include "api.h" // 包含通信接口类的头文件
-#include "db.h"  // 包含数据惯例模块的头文件
-#include <stdio.h>
-#include <string.h>
-#include "cJSON.h"
-#include <microhttpd.h> // 使用 microhttpd 或其他适合的 HTTP 服务器库
 
 const int MAX_REQUEST_SIZE = 1024;
 
@@ -14,10 +9,11 @@ bool validateUser(const char* username, const char* password)
 {
     // 从数据库中获取用户信息
     char db_pass[32];
-    bool userExists = getUserData(username, db_pass);
+    bool userExists = getUserData(db,username, db_pass);
 
-    if (userExists && strcmp(db_pass, password) == 0)
+    if (userExists && strncmp(db_pass, password, 32) == 0)
     {
+        printf("validateUser 2222");
         // 用户存在且密码匹配，验证通过
         return true;
     }
@@ -49,102 +45,124 @@ void handleException(const char* message)
     printf("Exception occurred: %s\n", message);
 }
 
-/// 处理用户注册请求与信息验证
-void handleUserRegister(char* request) {
+// 处理用户注册请求与信息验证
+void handleUserRegister(const char* request, struct MHD_Connection* connection) 
+{
+    // 从请求中获取用户名和密码
+    const char* username = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "username");
+    const char* password = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "password");
 
-  // 从请求JSON解析用户名密码
-  cJSON* json = cJSON_Parse(request);
-  
-  char* username = cJSON_GetObjectItem(json, "username")->valuestring;
-  char* password = cJSON_GetObjectItem(json, "password")->valuestring;
+    //printf("Received username: %s\n", username);
+    //printf("Received password: %s\n", password);
 
-  // 保存到数据库
-  saveUser(username, password);
-  
-  // 返回响应
-  cJSON* resp = cJSON_CreateObject();
-  cJSON_AddBoolToObject(resp, "success", 1);
-  char* resp_str = cJSON_Print(resp);
+    if (username && password) {
+        // 保存到数据库
+        if (saveUser(db,username, password)) {
 
-  sendHttpResp(200, "application/json", resp_str);
-  
-  cJSON_Delete(resp); // 清除object
-        free(resp_str);
-        cJSON_Delete(json);
-    } else {
-        handleException("JSON parsing error");
+            // 返回响应
+            cJSON* resp = cJSON_CreateObject();
+            cJSON_AddBoolToObject(resp, "success", 1);
+            cJSON_AddStringToObject(resp, "message", "注册成功"); // 添加注册成功的消息
+            printf("注册成功");
+            char* response_str = cJSON_Print(resp);
+
+            // 发送HTTP响应
+            struct MHD_Response* http_response = MHD_create_response_from_buffer(strlen(response_str),
+                (void*)response_str,
+                MHD_RESPMEM_MUST_COPY);
+            MHD_add_response_header(http_response, "Content-Type", "application/json");
+            int ret = MHD_queue_response(connection, MHD_HTTP_OK, http_response);
+
+            cJSON_Delete(resp);
+            free(response_str);
+        }
+        else {
+            handleException("Error saving user");
+        }
+    }
+    else {
+        handleException("Missing username or password");
     }
 }
+
 
 // 处理用户登录请求与验证
-void handleUserLogin(const char* request)
+void handleUserLogin(const char* request, struct MHD_Connection* connection)
 {
-	cJSON* json = cJSON_Parse(request);
-	
-     if (json) {
-        char* username = cJSON_GetObjectItem(json, "username")->valuestring;
-        char* password = cJSON_GetObjectItem(json, "password")->valuestring;
+    // 从请求中获取用户名和密码
+    const char* username = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "username");
+    const char* password = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "password");
 
+    printf("Received username: %s\n", username);
+    printf("Received password: %s\n", password);
+
+    if (username && password) {
+        // 验证用户
         bool isValidUser = validateUser(username, password);
 
+        // 创建响应 JSON 对象
         cJSON* response = cJSON_CreateObject();
-
         if (isValidUser) {
             cJSON_AddBoolToObject(response, "success", 1);
-            // Add other relevant data to the response JSON
-        } else {
+        }
+        else {
             cJSON_AddBoolToObject(response, "success", 0);
-            // Add other relevant data to the response JSON
         }
 
+        // 将响应 JSON 对象转换为字符串
         char* response_str = cJSON_Print(response);
 
-        sendHttpResp(200, "application/json", response_str);
-
+        // 发送HTTP响应
+        struct MHD_Response* http_response = MHD_create_response_from_buffer(strlen(response_str),
+            (void*)response_str,
+            MHD_RESPMEM_MUST_COPY);
+        MHD_add_response_header(http_response, "Content-Type", "application/json");
+        int ret = MHD_queue_response(connection, MHD_HTTP_OK, http_response);
+        
+        // 清理资源
         cJSON_Delete(response);
         free(response_str);
-        cJSON_Delete(json);
-    } else {
-        // Handle JSON parsing error
-        handleException("JSON parsing error");
+        MHD_destroy_response(http_response); // 销毁响应对象
+    }
+    else {
+        handleException("Missing username or password");
     }
 }
 
-// 处理设备控制请求,生成控制指令
-void handleDeviceControl(const char* request)
+
+//// 分析用户数据,生成统计报告
+//void analyzeSensorData() {
+//
+//  // 1. 从数据库获取温湿度数据
+//  char* sql = "SELECT * FROM EnvironmentData";
+//  queryDataFromDB(sql);
+//
+//  // 2. 统计分析,生成温湿度折线图数据
+//  double temp_data[100];
+//  double humid_data[100];
+//
+//  // 3. 生成柱状图数据
+//  int energy_data[5];
+//  int runtime_data[5];
+//
+//  // 4. 将统计结果序列化为JSON
+//  cJSON* analysis = generateResultJson(temp_data, humid_data, energy_data, runtime_data);
+//
+//  // 5. 返回给客户端 
+//  sendHttpResp(200, "application/json", analysis);
+//
+//}
+
+// 定义回调函数来处理接收到的响应数据
+size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp) 
 {
-    // 解析客户端请求，获取设备控制信息
-    // 从request中提取设备ID和控制指令等字段
+    size_t totalSize = size * nmemb;
+    char* response = (char*)userp;
 
-    // 生成设备控制指令
+    // 将响应数据复制到用户指定的缓冲区
+    memcpy(response, contents, totalSize);
 
-    // 发送设备控制指令给设备
-
-    // 返回控制结果响应
-    // 返回客户端JSON格式的设备控制结果响应
-}
-
-// 分析用户数据,生成统计报告
-void analyzeSensorData() {
-
-  // 1. 从数据库获取温湿度数据
-  char* sql = "SELECT * FROM EnvironmentData";
-  queryDataFromDB(sql);
-
-  // 2. 统计分析,生成温湿度折线图数据
-  double temp_data[100];
-  double humid_data[100];
-
-  // 3. 生成柱状图数据
-  int energy_data[5];
-  int runtime_data[5];
-
-  // 4. 将统计结果序列化为JSON
-  cJSON* analysis = generateResultJson(temp_data, humid_data, energy_data, runtime_data);
-
-  // 5. 返回给客户端 
-  sendHttpResp(200, "application/json", analysis);
-
+    return totalSize;
 }
 
 // 获取天气数据
@@ -155,161 +173,202 @@ const char* fetchWeatherData() {
     const char* key = "f8129a5e0cac5b3982285cbc817f9a91";
     const char* city = "武汉"; // 需要查询的城市
 
-    // 构建请求URL
+        // 构建请求URL
     char requestUrl[1024];
     snprintf(requestUrl, sizeof(requestUrl), "%s?city=%s&key=%s", url, city, key);
 
-    // 使用网络库发送GET请求，获取天气数据
+    // 初始化libcurl
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        fprintf(stderr, "Failed to initialize libcurl\n");
+        return NULL;
+    }
 
-    // 示例数据
-    const char* weatherData = "{\"temperature\": 25, \"humidity\": 60}";
+    // 设置请求URL
+    curl_easy_setopt(curl, CURLOPT_URL, requestUrl);
+
+    // 设置写回调函数
+    char responseBuffer[4096]; // 假设响应数据不超过 4096 字节
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, responseBuffer);
+
+    // 执行HTTP GET请求
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        fprintf(stderr, "Failed to perform GET request: %s\n", curl_easy_strerror(res));
+        curl_easy_cleanup(curl);
+        return NULL;
+    }
+
+    // 分配堆上的内存来存储响应数据
+    char* weatherData = strdup(responseBuffer);
+
+    curl_easy_cleanup(curl);
 
     return weatherData;
 }
 
 // 处理获取天气数据请求
-void handleWeatherRequest(evhttp_request* req, void* arg) {
+void handleWeatherRequest(struct MHD_Connection* connection) {
+
     const char* weather_data = fetchWeatherData();
 
-    // 构造响应
-    struct evbuffer* buf = evbuffer_new();
+    // 构造JSON响应
+    cJSON* jsonResponse = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonResponse, "weather", weather_data);
+    const char* responseStr = cJSON_Print(jsonResponse);
 
-    if (!buf) {
-        sendHttpError(req, 500);
-        return;
-    }
+    // 设置响应头
+    struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+        (void*)responseStr, MHD_RESPMEM_MUST_COPY);
+    MHD_add_response_header(response, "Content-Type", "application/json");
 
-    evbuffer_add_printf(buf, "%s", weather_data);
+    // 发送响应
+    int ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
 
-    // 设置响应代码和类型
-    struct evkeyvalq* headers = evhttp_request_get_output_headers(req);
-    evhttp_add_header(headers, "Content-Type", "application/json");
-    evhttp_send_reply(req, HTTP_OK, "OK", buf);
-
-    // 清理
-    evbuffer_free(buf);
+    // 释放资源
+    MHD_destroy_response(response);
+    cJSON_Delete(jsonResponse);
 }
 
-void handleNetworkConnectionTest(const char* request)
-{
+// 处理网络连接测试请求
+void handleNetworkConnectionTest(struct MHD_Connection* connection) {
     const char* response = "Network connection is available.\n";
-    sendHttpResp(200, "text/plain", response);
+    struct MHD_Response* mhdResponse = MHD_create_response_from_buffer(strlen(response),
+        (void*)response,
+        MHD_RESPMEM_PERSISTENT);
+    MHD_add_response_header(mhdResponse, "Content-Type", "text/plain");
+    MHD_queue_response(connection, MHD_HTTP_OK, mhdResponse);
+    MHD_destroy_response(mhdResponse);
 }
 
-// 发送HTTP错误响应
-void sendHttpError(evhttp_request* req, int error_code) {
-    const char* error_message = get_error_message(error_code);
+// 处理空调设备日总耗电分析请求
+void analyzeDataAirTotalPower(struct MHD_Connection* connection, const char* request) 
+{
+    cJSON* jsonRequest = cJSON_Parse(request);
 
-    struct evbuffer* buf = evbuffer_new();
-
-    if (!buf) {
-        // 处理 allocation failure
+    if (jsonRequest == NULL) {
+        printf("Invalid JSON request.\n");
         return;
     }
 
-    evbuffer_add_printf(buf, "%s", error_message);
+    cJSON* jsonDeviceName = cJSON_GetObjectItem(jsonRequest, "deviceName");
 
-    struct evkeyvalq* headers = evhttp_request_get_output_headers(req);
-    evhttp_add_header(headers, "Content-Type", "text/plain");
-    evhttp_send_reply(req, error_code, error_message, buf);
+    if (jsonDeviceName != NULL) {
+        const char* deviceName = jsonDeviceName->valuestring;
 
-    evbuffer_free(buf);
-}
+        // 获取设备ID
+        int deviceID = getDeviceID(db,deviceName);
 
-// 处理 空调 设备 日 总耗电分析请求
-void analyzeDataAirTotalPower(const char* request)
-{
-    // 解析请求，获取设备ID等信息，假设这里使用了JSON格式
-    json_object* jsonRequest = json_tokener_parse(request);
-    json_object* jsonDeviceID = NULL;
+        if (deviceID != -1) {
+            // 获取设备信息
+            struct Device airDevice;
+            if (getDevice(db,deviceName, &airDevice)) {
+                // 打开数据库
+                if (openDatabase("SHomedb.db")) {
+                    // 计算总耗电量
+                    double totalPower = calculateAirTotalPower(&airDevice);
 
-    if (json_object_object_get_ex(jsonRequest, "deviceID", &jsonDeviceID))
-    {
-        int deviceID = json_object_get_int(jsonDeviceID);
+                    // 构建JSON响应
+                    cJSON* jsonResponse = cJSON_CreateObject();
+                    cJSON_AddNumberToObject(jsonResponse, "totalPower", totalPower);
 
-        // 从数据库中查询空调设备的相关数据
-        struct DeviceData airDeviceData;
-        if (getDeviceData(deviceID, &airDeviceData))
-        {
-            // 计算总耗电量
-            double totalPower = calculateAirTotalPower(&airDeviceData);
+                    // 将 JSON 响应转换为字符串
+                    char* responseStr = cJSON_Print(jsonResponse);
 
-            // 构建JSON响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "totalPower", json_object_new_double(totalPower));
+                    // 创建 MHD_Response 对象
+                    struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                        (void*)responseStr,
+                        MHD_RESPMEM_MUST_COPY);
 
-			// 将 JSON 响应转换为字符串
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+                    // 设置 HTTP 响应头
+                    MHD_add_response_header(response, "Content-Type", "application/json");
 
-            // 构建 HTTP 响应
-            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
-                                                                           (void*)responseStr,
-                                                                           MHD_RESPMEM_MUST_COPY);
+                    // 发送 HTTP 响应给客户端
+                    MHD_queue_response(connection, MHD_HTTP_OK, response);
 
-            // 设置 HTTP 响应头
-            MHD_add_response_header(response, "Content-Type", "application/json");
+                    // 释放 MHD_Response 和 cJSON 对象
+                    MHD_destroy_response(response);
+                    cJSON_Delete(jsonResponse);
 
-            // 发送 HTTP 响应给客户端
-            MHD_queue_response(connection, MHD_HTTP_OK, response);
-
-            // 释放 MHD_Response 和 JSON 对象
-            MHD_destroy_response(response);
-            json_object_put(jsonResponse);
+                    // 关闭数据库
+                    closeDatabase();
+                }
+                else {
+                    printf("Failed to open database.\n");
+                }
+            }
+            else {
+                printf("Failed to retrieve device information.\n");
+            }
         }
-        else
-        {
-            // 设备数据不存在，返回错误信息
-            printf("Device data not found.\n");
+        else {
+            printf("Device not found.\n");
         }
     }
-    else
-    {
-        // 请求中没有包含必要的信息，返回错误信息
+    else {
         printf("Invalid request.\n");
     }
 
-    json_object_put(jsonRequest);
+    cJSON_Delete(jsonRequest);
 }
 
 // 处理 灯 设备 日 总耗电分析请求
-void analyzeDataLightTotalPower(const char* request)
+void analyzeDataLightTotalPower(struct MHD_Connection* connection, const char* request)
 {
     // 解析请求，获取设备ID等信息，使用JSON格式
-    json_object* jsonRequest = json_tokener_parse(request);
-    json_object* jsonDeviceID;
+    cJSON* jsonRequest = cJSON_Parse(request);
 
-    if (json_object_object_get_ex(jsonRequest, "deviceID", &jsonDeviceID))
+    if (jsonRequest == NULL) {
+        printf("Invalid JSON request.\n");
+        return;
+    }
+
+    cJSON* jsonDeviceName = cJSON_GetObjectItem(jsonRequest, "deviceName");
+
+    if (jsonDeviceName != NULL) 
     {
-        int deviceID = json_object_get_int(jsonDeviceID);
+        const char* deviceName = jsonDeviceName->valuestring;
 
-        // 从数据库中查询灯光设备的相关数据
-        struct DeviceData lightDeviceData;
-        if (getDeviceData(deviceID, &lightDeviceData))
-        {
-            // 计算总耗电量
-            double totalPower = calculateLightTotalPower(&lightDeviceData);
+        // 获取设备ID
+        int deviceID = getDeviceID(db,deviceName);
 
-            // 构建JSON响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "totalPower", json_object_new_double(totalPower));
+        if (deviceID != -1) {
+            // 获取设备信息
+            struct Device lightDevice;
+            if (getDevice(db,deviceName, &lightDevice)) {
+                // 打开数据库
+                if (openDatabase("SHomedb.db")) {
+                    // 计算总耗电量
+                    double totalPower = calculateLightTotalPower(&lightDevice);
 
-            // 将 JSON 响应转换为字符串
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+                    // 构建JSON响应
+                    cJSON* jsonResponse = cJSON_CreateObject();
+                    cJSON_AddNumberToObject(jsonResponse, "totalPower", totalPower);
 
-            // 构建 HTTP 响应
-            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
-                                                                           (void*)responseStr,
-                                                                           MHD_RESPMEM_MUST_COPY);
+                    // 将 JSON 响应转换为字符串
+                    char* responseStr = cJSON_Print(jsonResponse);
 
-            // 设置 HTTP 响应头
-            MHD_add_response_header(response, "Content-Type", "application/json");
+                    // 构建 HTTP 响应
+                    struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                        (void*)responseStr,
+                        MHD_RESPMEM_MUST_COPY);
 
-            // 发送 HTTP 响应给客户端
-            MHD_queue_response(connection, MHD_HTTP_OK, response);
+                    // 设置 HTTP 响应头
+                    MHD_add_response_header(response, "Content-Type", "application/json");
 
-            // 释放 MHD_Response 和 JSON 对象
-            MHD_destroy_response(response);
-            json_object_put(jsonResponse);
+                    // 发送 HTTP 响应给客户端
+                    MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+                    // 释放 MHD_Response
+                    MHD_destroy_response(response);
+
+                    // 关闭数据库
+                    closeDatabase();
+            }
+            else {
+                printf("Failed to open database.\n");
+            }
         }
         else
         {
@@ -321,203 +380,233 @@ void analyzeDataLightTotalPower(const char* request)
     {
         // 请求中没有包含必要的信息，返回错误信息
         printf("Invalid request.\n");
+        }
     }
 
     // 释放 JSON 对象
-    json_object_put(jsonRequest);
+     cJSON_Delete(jsonRequest);
 }
+
 
 // 处理 加湿器 设备 日 总耗电分析请求
-void analyzeDataHumidityTotalPower(const char* request)
+void analyzeDataHumidityTotalPower(struct MHD_Connection* connection, const char* request)
 {
-    // 解析请求，获取设备ID等信息，假设这里使用了JSON格式
-    json_object* jsonRequest = json_tokener_parse(request);
-    json_object* jsonDeviceID;
+    // 解析请求，获取设备ID等信息
+    cJSON* jsonRequest = cJSON_Parse(request);
 
-    if (json_object_object_get_ex(jsonRequest, "deviceID", &jsonDeviceID))
+    if (jsonRequest == NULL) {
+        printf("Invalid JSON request.\n");
+        return;
+    }
+
+    cJSON* jsonDeviceName = cJSON_GetObjectItem(jsonRequest, "deviceName");
+
+    if (jsonDeviceName != NULL) 
     {
-        int deviceID = json_object_get_int(jsonDeviceID);
+        const char* deviceName = jsonDeviceName->valuestring;
 
-        // 从数据库中查询加湿器设备的相关数据
-        struct DeviceData humidityDeviceData;
-        if (getDeviceData(deviceID, &humidityDeviceData))
-        {
-            // 计算总耗电量
-            double totalPower = calculateHumidityTotalPower(&humidityDeviceData);
+        // 获取设备ID
+        int deviceID = getDeviceID(db,deviceName);
 
-            // 构建JSON响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "totalPower", json_object_new_double(totalPower));
+        if (deviceID != -1) {
+            // 获取设备信息
+            struct Device humidityDevice;
+            if (getDevice(db,deviceName, &humidityDevice)) {
+                // 打开数据库
+                if (openDatabase("SHomedb.db")) {
+                    // 计算总耗电量
+                    double totalPower = calculateHumidityTotalPower(&humidityDevice);
 
-            // 将 JSON 响应转换为字符串
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+                    // 构建JSON响应
+                    cJSON* jsonResponse = cJSON_CreateObject();
+                    cJSON_AddNumberToObject(jsonResponse, "totalPower", totalPower);
 
-            // 构建 HTTP 响应
-            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
-                                                                           (void*)responseStr,
-                                                                           MHD_RESPMEM_MUST_COPY);
+                    // 将 JSON 响应转换为字符串
+                    char* responseStr = cJSON_Print(jsonResponse);
 
-            // 设置 HTTP 响应头
-            MHD_add_response_header(response, "Content-Type", "application/json");
+                    // 构建 HTTP 响应
+                    struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                        (void*)responseStr,
+                        MHD_RESPMEM_MUST_COPY);
 
-            // 发送 HTTP 响应给客户端
-            MHD_queue_response(connection, MHD_HTTP_OK, response);
+                    // 设置 HTTP 响应头
+                    MHD_add_response_header(response, "Content-Type", "application/json");
 
-            // 释放 MHD_Response 和 JSON 对象
-            MHD_destroy_response(response);
-            json_object_put(jsonResponse);
+                    // 发送 HTTP 响应给客户端
+                    MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+                    // 释放 MHD_Response
+                    MHD_destroy_response(response);
+
+                    // 关闭数据库
+                    closeDatabase();
+                }
+                else {
+                    printf("Failed to open database.\n");
+                }
+            }
+            else {
+                printf("Failed to retrieve device information.\n");
+            }
         }
-        else
-        {
-            // 设备数据不存在，返回错误信息
-            printf("Device data not found.\n");
+        else {
+            printf("Device not found.\n");
         }
     }
-    else
-    {
-        // 请求中没有包含必要的信息，返回错误信息
+    else {
         printf("Invalid request.\n");
     }
 
-    // 释放JSON对象
-    json_object_put(jsonRequest);
-
+    cJSON_Delete(jsonRequest);
 }
 
-// 处理设备 日 使用时长分析请求
-void analyzeDataTime(const char* request)
-{
-    // 解析请求，获取设备ID等信息，假设这里使用了JSON格式
-    json_object* jsonRequest = json_tokener_parse(request);
-    json_object* jsonDeviceID;
+// // 处理设备日使用时长分析请求
+// void analyzeDataTime(struct MHD_Connection* connection, const char* request)
+// {
+//     // 解析请求，获取设备ID等信息，假设这里使用了JSON格式
+//     cJSON* jsonRequest = cJSON_Parse(request);
+//     cJSON* jsonDeviceID;
 
-    if (json_object_object_get_ex(jsonRequest, "deviceID", &jsonDeviceID))
-    {
-        int deviceID = json_object_get_int(jsonDeviceID);
+//     if (jsonRequest != NULL && cJSON_HasObjectItem(jsonRequest, "deviceID"))
+//     {
+//         jsonDeviceID = cJSON_GetObjectItem(jsonRequest, "deviceID");
+//         int deviceID = jsonDeviceID->valueint;
 
-        // 从数据库中查询设备的使用时长
-        double totalUsageTime = calculateDeviceTotalUsageTime(deviceID);
+//         // 从数据库中查询设备的使用时长
+//         double totalUsageTime = calculateDeviceTotalUsageTime(deviceID);
 
-        // 构建JSON响应
-        json_object* jsonResponse = json_object_new_object();
-        json_object_object_add(jsonResponse, "totalUsageTime", json_object_new_double(totalUsageTime));
+//         // 构建JSON响应
+//         cJSON* jsonResponse = cJSON_CreateObject();
+//         cJSON_AddNumberToObject(jsonResponse, "totalUsageTime", totalUsageTime);
 
-        // 将 JSON 响应转换为字符串
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+//         // 将 JSON 响应转换为字符串
+//         char* responseStr = cJSON_Print(jsonResponse);
 
-        // 构建 HTTP 响应
-        struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
-                                                                           (void*)responseStr,
-                                                                           MHD_RESPMEM_MUST_COPY);
+//         // 创建 MHD_Response 对象
+//         struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+//             (void*)responseStr,
+//             MHD_RESPMEM_MUST_COPY);
 
-        // 设置 HTTP 响应头
-        MHD_add_response_header(response, "Content-Type", "application/json");
+//         // 设置 HTTP 响应头
+//         MHD_add_response_header(response, "Content-Type", "application/json");
 
-        // 发送 HTTP 响应给客户端
-        MHD_queue_response(connection, MHD_HTTP_OK, response);
+//         // 发送 HTTP 响应给客户端
+//         MHD_queue_response(connection, MHD_HTTP_OK, response);
 
-        // 释放 MHD_Response 和 JSON 对象
-        MHD_destroy_response(response);
-        json_object_put(jsonResponse);
-    }
-    else
-    {
-        // 请求中没有包含必要的信息，返回错误信息
-        printf("Invalid request.\n");
-    }
+//         // 释放 MHD_Response 和 cJSON 对象
+//         MHD_destroy_response(response);
+//         cJSON_Delete(jsonResponse);
+//     }
+//     else
+//     {
+//         // 请求中没有包含必要的信息，返回错误信息
+//         printf("Invalid request.\n");
+//     }
 
-    // 释放JSON对象
-    json_object_put(jsonRequest);
-}
+//     // 释放 cJSON 对象
+//     cJSON_Delete(jsonRequest);
+// }
 
 // 更新空调设备信息到数据库
-void updateAirDeviceStatus(const char* request)
+void updateAirDeviceStatus(struct MHD_Connection* connection, const char* request, sqlite3* db)
 {
     // 解析请求，获取设备信息
-    json_object* jsonRequest = json_tokener_parse(request);
-    json_object* jsonDeviceID;
-    json_object* jsonStatusValue;
-    json_object* jsonMode;
-    json_object* jsonFeature;
+    const char* deviceNameParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "deviceName");
+    const char* statusValueParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "statusValue");
+    const char* modeParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "mode");
+    const char* featureParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "feature");
+    const char* timeParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "timestamp");
 
-    if (json_object_object_get_ex(jsonRequest, "deviceID", &jsonDeviceID) &&
-        json_object_object_get_ex(jsonRequest, "statusValue", &jsonStatusValue) &&
-        json_object_object_get_ex(jsonRequest, "mode", &jsonMode) &&
-        json_object_object_get_ex(jsonRequest, "feature", &jsonFeature))
-    {
-        int deviceID = json_object_get_int(jsonDeviceID);
-        int statusValue = json_object_get_int(jsonStatusValue);
-        int mode = json_object_get_int(jsonMode);
-        double feature = json_object_get_double(jsonFeature); // 温度
+    printf("deviceNameParam: %s\n", deviceNameParam);
+    printf("statusValueParam: %s\n", statusValueParam);
+    printf("modeParam: %s\n", modeParam);
+    printf("featureParam: %s\n", featureParam);
+    printf("timeParam: %s\n", timeParam);
+
+    if (deviceNameParam && statusValueParam && modeParam && featureParam) {
+        int deviceID = atoi(deviceIDParam);
+        int statusValue = atoi(statusValueParam);
+        int mode = atoi(modeParam);
+        double feature = atof(featureParam); // 温度
 
         // 使用 SQLite 更新语句将数据更新到数据库
         char sql[256];
         snprintf(sql, sizeof(sql), "UPDATE DeviceData SET StatusValue = %d, Mode = %d, Feature = %lf WHERE DeviceID = %d;", statusValue, mode, feature, deviceID);
+        printf("Generated SQL query: %s\n", sql);
 
-         // 执行更新语句
+        // 执行更新语句
         char* errmsg = NULL;
         int rc = sqlite3_exec(db, sql, NULL, 0, &errmsg);
-        if (rc != SQLITE_OK)
-        {
+        if (rc != SQLITE_OK) {
             // 更新失败，打印错误信息
             printf("Error updating data: %s\n", errmsg);
             sqlite3_free(errmsg);
 
             // 构建 JSON 响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "success", json_object_new_boolean(false));
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+            cJSON* jsonResponse = cJSON_CreateObject();
+            cJSON_AddBoolToObject(jsonResponse, "success", 0);
+            const char* responseStr = cJSON_Print(jsonResponse);
 
-            // 发送响应给客户端
-            send(clientSocket, responseStr, strlen(responseStr), 0);
+            // 发送 HTTP 响应给客户端
+            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                (void*)responseStr,
+                MHD_RESPMEM_MUST_COPY);
+            MHD_add_response_header(response, "Content-Type", "application/json");
+            MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, response); // 使用 HTTP 400 状态码
+            MHD_destroy_response(response);
 
-            json_object_put(jsonResponse);
-        }
-        else
-        {
+            cJSON_Delete(jsonResponse);
+        } else {
             // 更新成功，构建 JSON 响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "success", json_object_new_boolean(true));
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+            cJSON* jsonResponse = cJSON_CreateObject();
+            cJSON_AddItemToObject(jsonResponse, "success", cJSON_CreateTrue());
+            const char* responseStr = cJSON_PrintUnformatted(jsonResponse);
 
-            // 发送响应给客户端
-            send(clientSocket, responseStr, strlen(responseStr), 0);
+            // 发送 HTTP 响应给客户端
+            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                (void*)responseStr,
+                MHD_RESPMEM_MUST_COPY);
+            MHD_add_response_header(response, "Content-Type", "application/json");
+            MHD_queue_response(connection, MHD_HTTP_OK, response); // 使用 HTTP 200 状态码
+            MHD_destroy_response(response);
 
-            json_object_put(jsonResponse);
+            cJSON_Delete(jsonResponse);
         }
+    } else {
+        // 无效请求，构建 JSON 响应
+        cJSON* jsonResponse = cJSON_CreateObject();
+        cJSON_AddItemToObject(jsonResponse, "success", cJSON_CreateFalse());
+        const char* responseStr = cJSON_PrintUnformatted(jsonResponse);
+
+        // 发送 HTTP 响应给客户端
+        struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+            (void*)responseStr,
+            MHD_RESPMEM_MUST_COPY);
+        MHD_add_response_header(response, "Content-Type", "application/json");
+        MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, response); // 使用 HTTP 400 状态码
+        MHD_destroy_response(response);
+
+        cJSON_Delete(jsonResponse);
     }
-    else
-    {
-       // 无效请求，构建 JSON 响应
-        json_object* jsonResponse = json_object_new_object();
-        json_object_object_add(jsonResponse, "success", json_object_new_boolean(false));
-        const char* responseStr = json_object_to_json_string(jsonResponse);
-
-        // 发送响应给客户端
-        send(clientSocket, responseStr, strlen(responseStr), 0);
-
-        json_object_put(jsonResponse);
-    }
-
-    json_object_put(jsonRequest);
 }
 
+
 // 更新灯设备信息到数据库
-void updateLightDeviceStatus(const char* request)
+void updateLightDeviceStatus(struct MHD_Connection* connection, const char* request, sqlite3* db)
 {
     // 解析请求，获取设备信息
-    json_object* jsonRequest = json_tokener_parse(request);
-    json_object* jsonDeviceID;
-    json_object* jsonStatusValue;
-    json_object* jsonMode;
+    cJSON* jsonRequest = cJSON_Parse(request);
+    cJSON* jsonDeviceID;
+    cJSON* jsonStatusValue;
+    cJSON* jsonMode;
 
-    if (json_object_object_get_ex(jsonRequest, "deviceID", &jsonDeviceID) &&
-        json_object_object_get_ex(jsonRequest, "statusValue", &jsonStatusValue) &&
-        json_object_object_get_ex(jsonRequest, "mode", &jsonMode))
+    if ((jsonDeviceID = cJSON_GetObjectItem(jsonRequest, "deviceID")) &&
+        (jsonStatusValue = cJSON_GetObjectItem(jsonRequest, "statusValue")) &&
+        (jsonMode = cJSON_GetObjectItem(jsonRequest, "mode")))
     {
-        int deviceID = json_object_get_int(jsonDeviceID);
-        int statusValue = json_object_get_int(jsonStatusValue);
-        int mode = json_object_get_int(jsonMode);
+        int deviceID = cJSON_GetNumberValue(jsonDeviceID);
+        int statusValue = cJSON_GetNumberValue(jsonStatusValue);
+        int mode = cJSON_GetNumberValue(jsonMode);
 
         // 使用 SQLite 更新语句将数据更新到数据库
         char sql[256];
@@ -533,60 +622,80 @@ void updateLightDeviceStatus(const char* request)
             sqlite3_free(errmsg);
 
             // 构建 JSON 响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "success", json_object_new_boolean(false));
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+            cJSON* jsonResponse = cJSON_CreateObject();
+            cJSON_AddBoolToObject(jsonResponse, "success", 0);
+            const char* responseStr = cJSON_Print(jsonResponse);
 
-            // 发送响应给客户端
-            send(clientSocket, responseStr, strlen(responseStr), 0);
+            // 发送 HTTP 响应给客户端
+            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                (void*)responseStr,
+                MHD_RESPMEM_MUST_COPY);
+            MHD_add_response_header(response, "Content-Type", "application/json");
+            MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, response); // 使用 HTTP 400 状态码
+            MHD_destroy_response(response);
 
-            json_object_put(jsonResponse);
+            cJSON_Delete(jsonResponse);
         }
         else
         {
             // 更新成功，构建 JSON 响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "success", json_object_new_boolean(true));
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+            cJSON* jsonResponse = cJSON_CreateObject();
+            cJSON_AddItemToObject(jsonResponse, "success", cJSON_CreateTrue());
+            const char* responseStr = cJSON_PrintUnformatted(jsonResponse);
 
-            // 发送响应给客户端
-            send(clientSocket, responseStr, strlen(responseStr), 0);
+            // 发送 HTTP 响应给客户端
+            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                (void*)responseStr,
+                MHD_RESPMEM_MUST_COPY);
+            MHD_add_response_header(response, "Content-Type", "application/json");
+            MHD_queue_response(connection, MHD_HTTP_OK, response); // 使用 HTTP 200 状态码
+            MHD_destroy_response(response);
 
-            json_object_put(jsonResponse);
+            cJSON_Delete(jsonResponse);
         }
     }
     else
     {
-       // 无效请求，构建 JSON 响应
-        json_object* jsonResponse = json_object_new_object();
-        json_object_object_add(jsonResponse, "success", json_object_new_boolean(false));
-        const char* responseStr = json_object_to_json_string(jsonResponse);
+        // 无效请求，构建 JSON 响应
+        cJSON* jsonResponse = cJSON_CreateObject();
+        cJSON_AddItemToObject(jsonResponse, "success", cJSON_CreateFalse());
+        const char* responseStr = cJSON_PrintUnformatted(jsonResponse);
 
-        // 发送响应给客户端
-        send(clientSocket, responseStr, strlen(responseStr), 0);
+        // 发送 HTTP 响应给客户端
+        struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+            (void*)responseStr,
+            MHD_RESPMEM_MUST_COPY);
+        MHD_add_response_header(response, "Content-Type", "application/json");
+        MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, response); // 使用 HTTP 400 状态码
+        MHD_destroy_response(response);
 
-        json_object_put(jsonResponse);
+        cJSON_Delete(jsonResponse);
     }
 
-    json_object_put(jsonRequest);
+    cJSON_Delete(jsonRequest);
 }
 
 // 更新加湿器设备信息到数据库
-void updateHumidityDeviceStatus(const char* request)
+void updateHumidityDeviceStatus(struct MHD_Connection* connection, const char* request, sqlite3* db)
 {
     // 解析请求，获取设备信息
-    json_object* jsonRequest = json_tokener_parse(request);
-    json_object* jsonDeviceID;
-    json_object* jsonStatusValue;
-    json_object* jsonFeature;
+    cJSON* jsonRequest = cJSON_Parse(request);
+    cJSON* jsonDeviceID;
+    cJSON* jsonStatusValue;
+    cJSON* jsonFeature;
 
-    if (json_object_object_get_ex(jsonRequest, "deviceID", &jsonDeviceID) &&
-        json_object_object_get_ex(jsonRequest, "statusValue", &jsonStatusValue) &&
-        json_object_object_get_ex(jsonRequest, "feature", &jsonFeature))
+    if (jsonRequest &&
+        cJSON_HasObjectItem(jsonRequest, "deviceID") &&
+        cJSON_HasObjectItem(jsonRequest, "statusValue") &&
+        cJSON_HasObjectItem(jsonRequest, "feature"))
     {
-        int deviceID = json_object_get_int(jsonDeviceID);
-        int statusValue = json_object_get_int(jsonStatusValue);
-        double feature = json_object_get_double(jsonFeature); // 湿度
+        jsonDeviceID = cJSON_GetObjectItem(jsonRequest, "deviceID");
+        jsonStatusValue = cJSON_GetObjectItem(jsonRequest, "statusValue");
+        jsonFeature = cJSON_GetObjectItem(jsonRequest, "feature");
+
+        int deviceID = jsonDeviceID->valueint;
+        int statusValue = jsonStatusValue->valueint;
+        double feature = jsonFeature->valuedouble; // 湿度
 
         // 使用 SQLite 更新语句将数据更新到数据库
         char sql[256];
@@ -602,42 +711,57 @@ void updateHumidityDeviceStatus(const char* request)
             sqlite3_free(errmsg);
 
             // 构建 JSON 响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "success", json_object_new_boolean(false));
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+            cJSON* jsonResponse = cJSON_CreateObject();
+            cJSON_AddBoolToObject(jsonResponse, "success", 0);
+            const char* responseStr = cJSON_Print(jsonResponse);
 
-            // 发送响应给客户端
-            send(clientSocket, responseStr, strlen(responseStr), 0);
+            // 发送 HTTP 响应给客户端
+            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                (void*)responseStr,
+                MHD_RESPMEM_MUST_COPY);
+            MHD_add_response_header(response, "Content-Type", "application/json");
+            MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, response); // 使用 HTTP 400 状态码
+            MHD_destroy_response(response);
 
-            json_object_put(jsonResponse);
+            cJSON_Delete(jsonResponse);
         }
         else
         {
             // 更新成功，构建 JSON 响应
-            json_object* jsonResponse = json_object_new_object();
-            json_object_object_add(jsonResponse, "success", json_object_new_boolean(true));
-            const char* responseStr = json_object_to_json_string(jsonResponse);
+            cJSON* jsonResponse = cJSON_CreateObject();
+            cJSON_AddBoolToObject(jsonResponse, "success", 1);
+            const char* responseStr = cJSON_Print(jsonResponse);
 
-            // 发送响应给客户端
-            send(clientSocket, responseStr, strlen(responseStr), 0);
+            // 发送 HTTP 响应给客户端
+            struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                (void*)responseStr,
+                MHD_RESPMEM_MUST_COPY);
+            MHD_add_response_header(response, "Content-Type", "application/json");
+            MHD_queue_response(connection, MHD_HTTP_OK, response); // 使用 HTTP 200 状态码
+            MHD_destroy_response(response);
 
-            json_object_put(jsonResponse);
+            cJSON_Delete(jsonResponse);
         }
     }
     else
     {
-       // 无效请求，构建 JSON 响应
-        json_object* jsonResponse = json_object_new_object();
-        json_object_object_add(jsonResponse, "success", json_object_new_boolean(false));
-        const char* responseStr = json_object_to_json_string(jsonResponse);
+        // 无效请求，构建 JSON 响应
+        cJSON* jsonResponse = cJSON_CreateObject();
+        cJSON_AddBoolToObject(jsonResponse, "success", 0);
+        const char* responseStr = cJSON_Print(jsonResponse);
 
-        // 发送响应给客户端
-        send(clientSocket, responseStr, strlen(responseStr), 0);
+        // 发送 HTTP 响应给客户端
+        struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+            (void*)responseStr,
+            MHD_RESPMEM_MUST_COPY);
+        MHD_add_response_header(response, "Content-Type", "application/json");
+        MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, response); // 使用 HTTP 400 状态码
+        MHD_destroy_response(response);
 
-        json_object_put(jsonResponse);
+        cJSON_Delete(jsonResponse);
     }
 
-    json_object_put(jsonRequest);
+    cJSON_Delete(jsonRequest);
 }
 
 

@@ -30,7 +30,6 @@ SOURCES += \
     weatherwidget.cpp \
     tabwidget.cpp \
     datawidget.cpp \
-    environmentwidget.cpp \
     registerview.cpp \
     loginview.cpp \
     sensormodule.cpp \
@@ -42,7 +41,6 @@ HEADERS += \
     weatherwidget.h \
     tabwidget.h \
     datawidget.h \
-    environmentwidget.h \
     registerview.h \
     loginview.h \
     sensormodule.h \
@@ -54,7 +52,6 @@ FORMS += \
     weatherwidget.ui \
     tabwidget.ui \
     datawidget.ui \
-    environmentwidget.ui \
     registerview.ui \
     loginview.ui
 

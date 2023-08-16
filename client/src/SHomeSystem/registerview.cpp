@@ -1,8 +1,5 @@
 #include "registerview.h"
 #include "ui_registerview.h"
-#include <QtDebug>
-#include <QMessageBox>
-#include <QtNetwork>
 
 RegisterView::RegisterView(QWidget *parent) :
     QWidget(parent),
@@ -64,15 +61,11 @@ bool RegisterView::validateInput()
 void RegisterView::onRegisterButtonClicked()
 {
     // 首先验证输入是否有效
+    // 首先验证输入是否有效
     if (!validateInput())
     {
         // 输入无效，显示错误信息给用户
-        // 处理无效输入的代码
-
-
-
-
-        //...
+        QMessageBox::warning(this, "错误", "请输入有效的用户名和密码！");
         return;
     }
 
@@ -83,34 +76,52 @@ void RegisterView::onRegisterButtonClicked()
 // 在客户端中调用UserDB的saveUser()函数
 void RegisterView::callRegisterAPI()
 {
-    QString name = ui->nameEdit->text().trimmed();
+    QString username = ui->nameEdit->text().trimmed();
     QString password = ui->pwdEdit->text();
 
     // 创建QNetworkAccessManager对象
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 
     // 构建HTTP请求
-    QNetworkRequest request(QUrl("http://127.0.0.1：8080/user/register"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    QUrl url("http://127.0.0.1:8080/user/register/");
+    QUrlQuery query;
+    query.addQueryItem("username", username);
+    query.addQueryItem("password", password);
+    url.setQuery(query);
 
-    // 构建请求参数
-    QByteArray postData;
-    postData.append("username=" + name);
-    postData.append("&password=" + password);
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    // 发送HTTP POST请求
-    QNetworkReply *reply = manager->post(request, postData);
+    // 发送HTTP GET请求（将数据作为URL参数）
+    QNetworkReply *reply = manager->get(request);
 
     // 连接信号和槽，处理服务器的响应
-    connect(reply, &QNetworkReply::finished, this, [reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+
         if (reply->error() == QNetworkReply::NoError) {
             // 请求成功，解析服务器响应的JSON数据并进行处理
             QByteArray responseData = reply->readAll();
-            // 解析JSON数据并处理
-            // 例如检查注册是否成功，弹出相应的提示框等
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(responseData);
+
+            if (!jsonResponse.isNull() && jsonResponse.isObject()) {
+                QJsonObject jsonObject = jsonResponse.object();
+                bool isSuccess = jsonObject.value("success").toBool();
+                QString message = jsonObject.value("message").toString();
+
+                if (isSuccess) {
+                    // 注册成功
+                    qDebug() << "Registration successful:" << message;
+                    QMessageBox::information(this, "Registration successful", "注册成功");
+                } else {
+                    // 注册失败
+                    qDebug() << "Registration failed:" << message;
+                    QMessageBox::warning(this, "Registration failed", "注册失败");
+                }
+            }
         } else {
             // 请求失败
             qDebug() << "Registration failed:" << reply->errorString();
+            QMessageBox::warning(this, "Registration failed", "网络错误，请稍后再试！");
         }
         reply->deleteLater();
     });

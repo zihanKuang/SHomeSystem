@@ -3,35 +3,60 @@
 DataWidget::DataWidget(QWidget *parent)
     : QWidget(parent)
 {
-    chartView = new QChartView(this);
+    layout = new QVBoxLayout(this);
 
-    QChart *chart = new QChart();
-    QBarSeries *series = new QBarSeries();
+    powerConsumptionBarChartView = new QChartView();
+    usageDurationBarChartView = new QChartView();
 
-    // Add bar sets and data to the series
-    QBarSet *barSet = new QBarSet("Category 1");
-    *barSet << 1 << 2 << 3;
-    series->append(barSet);
+    layout->addWidget(powerConsumptionBarChartView);
+    layout->addWidget(usageDurationBarChartView);
 
-    QBarSet *barSet2 = new QBarSet("Category 2");
-    *barSet2 << 4 << 5 << 6;
-    series->append(barSet2);
+    // 存疑
+    //
+    // 连接信号 dataReceived 到槽 handleDataReceived
+    TabWidget *tabWidget = qobject_cast<TabWidget*>(parentWidget()); // 获取父 TabWidget 的实例
+    if (tabWidget) {
+        connect(tabWidget, &TabWidget::dataReceived, this, &DataWidget::handleDataReceived);
+    }
+}
+
+void DataWidget::handleDataReceived(const QString& deviceName, double totalPower)
+{
+    // 存储耗电量数据到映射中
+    devicePowerMap[deviceName] = totalPower;
+
+    // 在这里进行数据的处理和渲染
+    renderBarChart();
+}
+
+void DataWidget::renderBarChart()
+{
+    QChart *chart = new QChart;
+    QBarSeries *series = new QBarSeries;
+
+    // 遍历 devicePowerMap，为每个设备添加柱状图数据
+    for (const QString& deviceName : devicePowerMap.keys()) {
+        QBarSet *set = new QBarSet(deviceName);
+        *set << devicePowerMap[deviceName];
+        series->append(set);
+    }
 
     chart->addSeries(series);
 
-    QValueAxis *axisX = new QValueAxis();
+    // 创建柱状图的 X 轴和 Y 轴
+    QBarCategoryAxis *axisX = new QBarCategoryAxis;
+    axisX->append(devicePowerMap.keys());
     chart->addAxis(axisX, Qt::AlignBottom);
     series->attachAxis(axisX);
 
-    QValueAxis *axisY = new QValueAxis();
+    QValueAxis *axisY = new QValueAxis;
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 
-    chartView->setChart(chart);
+    // 创建柱状图视图并设置到界面
+    QChartView *chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(chartView);
-    setLayout(layout);
 }
 

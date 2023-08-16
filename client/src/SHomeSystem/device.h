@@ -1,20 +1,12 @@
-    #ifndef DEVICE_H
+#ifndef DEVICE_H
 #define DEVICE_H
 
-#include <vector>
 #include <QString>
+
 class Device {
 public:
     enum class State { ON, OFF }; // 目前开还是关
     enum class TimerType { ON, OFF ,NOT_SET}; // 定时开还是关
-
-//    struct WeeklyStat {
-//      int week; // 周序号
-//      double totalPower; // 周耗电量
-//      int totalTime; // 周使用时长
-//    };
-
-//    std::vector<WeeklyStat> weeklyStats;
 
     void turnOn();
     void turnOff();
@@ -23,11 +15,6 @@ public:
     void setState(State state);
     //控制开关
     void togglePower();
-
-//    //更新每周的统计数据
-//    void updateWeeklyStats(int week, double powerConsumption, int usageTime);
-//    //平均功率计算函数
-//    double calculateAveragePower();
 
 protected:
     State state = State::OFF;

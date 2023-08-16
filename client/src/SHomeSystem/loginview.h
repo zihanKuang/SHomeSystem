@@ -2,7 +2,8 @@
 #define LOGINVIEW_H
 
 #include <QWidget>
-#include "userdb.h"
+#include <QtNetwork>
+#include <QMessageBox>
 
 namespace Ui {
 class LoginView;
