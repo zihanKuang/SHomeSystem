@@ -29,7 +29,7 @@ void Executor::sendLightCommand(const QString& deviceName,Light::LightMode mode,
 }
 
 // 对加湿器发指令
-void Executor::sendHumidityCommand(const QString& deviceName, double humidity, bool powerOn)
+void Executor::sendHumidityCommand(const QString& deviceName, double humidity, bool powerOn, bool flag)
 {
     QString command = "Sending command to humidity:\n";
      command += QString("Device Name: %1\n").arg(deviceName);
@@ -37,6 +37,8 @@ void Executor::sendHumidityCommand(const QString& deviceName, double humidity, b
     command += QString("Power: %1\n").arg(powerOn ? "On" : "Off");
 
     // 模拟发送命令给加湿器
+    if(flag)
+        return;
     QMessageBox::information(nullptr, "Humidity Command", command);
 }
 

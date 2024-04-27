@@ -26,7 +26,7 @@ public:
     {
         if (DataWidget->objectName().isEmpty())
             DataWidget->setObjectName(QStringLiteral("DataWidget"));
-        DataWidget->resize(730, 592);
+        DataWidget->resize(900, 900);
 
         retranslateUi(DataWidget);
 

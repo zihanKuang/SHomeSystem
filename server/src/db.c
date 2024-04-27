@@ -2,6 +2,7 @@
 
 #include "db.h" 
 #include <time.h>
+#include <stdio.h>
 
 // 全局数据库连接句柄
 sqlite3* db;
@@ -142,7 +143,8 @@ bool getDeviceData(sqlite3* db,int deviceID, struct DeviceData* deviceData)
     if (sqlite3_step(stmt) == SQLITE_ROW)
     {
         deviceData->DataID = sqlite3_column_int(stmt, 0);
-        deviceData->DeviceID = sqlite3_column_int(stmt, 1);
+
+        strcpy(deviceData->DeviceName , (const char*)sqlite3_column_text(stmt, 1));
 
         // 使用strcpy替代直接赋值
         strcpy(deviceData->Timestamp, (const char*)sqlite3_column_text(stmt, 2));
@@ -172,11 +174,13 @@ void addToDeviceDataList(struct DeviceData data) {
 }
 
 // 查询一天内的设备运行数据
-int getDeviceDataWithinDay(sqlite3* db,int deviceID, const char* timestamp, struct DeviceData deviceDataList[], int* numEntries)
+int getDeviceDataWithinDay(sqlite3* db,const char* deviceName ,const char* timestamp, struct DeviceData deviceDataList[], int* numEntries)
 {
+    // 调用getCurrentDate并打印结果
+    //printf("Current Date: %s\n", timestamp);
+
     char sql[256];
-    snprintf(sql, sizeof(sql), "SELECT * FROM DeviceData WHERE DeviceID = %d AND Timestamp >= '%s 00:00:00' AND Timestamp < '%s 23:59:59';",
-        deviceID, timestamp, timestamp);
+    snprintf(sql, sizeof(sql), "SELECT * FROM DeviceData WHERE DeviceName = '%s' AND Timestamp >= '%s 00:00:00' AND Timestamp < '%s 23:59:59';", deviceName, timestamp, timestamp);
 
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
@@ -193,28 +197,38 @@ int getDeviceDataWithinDay(sqlite3* db,int deviceID, const char* timestamp, stru
     {
         struct DeviceData data;
         data.DataID = sqlite3_column_int(stmt, 0);
-        data.DeviceID = sqlite3_column_int(stmt, 1);
+        strcpy(data.DeviceName , (const char*)sqlite3_column_text(stmt, 1));
         strcpy(data.Timestamp, (const char*)sqlite3_column_text(stmt, 2));
         data.StatusValue = sqlite3_column_int(stmt, 3);
         data.Mode = sqlite3_column_int(stmt, 4);
         data.Feature = sqlite3_column_double(stmt, 5);
+
+        // 打印每次查询结果的参数
+        /* printf("  Entry #%d:\n", *numEntries);
+        printf("  DataID: %d\n", data.DataID);
+        printf("  DeviceName: %s\n", data.DeviceName);
+        printf("  Timestamp: %s\n", data.Timestamp);
+        printf("  StatusValue: %d\n", data.StatusValue);
+        printf("  Mode: %d\n", data.Mode);
+        printf("  Feature: %lf\n", data.Feature); */
+
         deviceDataList[(*numEntries)++] = data;
+
+        //printf("Total Entries: %d\n", *numEntries); // 打印总条目数
     }
 
     sqlite3_finalize(stmt);
+	
+	 // 如果没有获取到数据，则返回0
+     //if (*numEntries == 0) {
+     //    printf("No device data found for %s on %s\n", deviceName, timestamp);
+     //    return 0;
+     //}
+	
     return 1; // 返回1表示查询成功
 }
 
-// 解析时间戳字符串为 time_t
-time_t parseTimestamp(const char* timestampStr)
-{
-    struct tm tm_time;
-    if (strptime(timestampStr, "%Y-%m-%d %H:%M:%S", &tm_time) != NULL)
-    {
-        return mktime(&tm_time);
-    }
-    return 0; // 返回0表示解析失败
-}
+
 
 // 获取最近的开机时间
 time_t getLastBootTime(sqlite3* db,int deviceID)
@@ -236,63 +250,102 @@ time_t getLastBootTime(sqlite3* db,int deviceID)
     return lastBootTime;
 }
 
-// 根据设备名获取设备ID
-int getDeviceID(sqlite3* db,const char* deviceName) {
 
-    if (!openDatabase("SHomedb.db")) { 
-        printf("Failed to open database.\n");
-        return -1;
+// 解析 ISO 8601 格式的时间戳字符串为 time_t
+time_t parseTimestamppp(const char* timestampStr)
+{
+	
+    struct tm tm_time = {0}; // 初始化 struct tm 结构体
+
+    // 使用 strptime 函数来解析 ISO 8601 格式的时间戳字符串
+    if (strptime(timestampStr, "%Y-%m-%d %H:%M:%S", &tm_time) != NULL)
+    {
+		tm_time.tm_year += 1900;// 年份需要加上 1900
+		tm_time.tm_mon += 1;// 月份需要加上 1
+		
+        // 输出年份、月份和秒钟部分的值
+        /* printf("Year: %d\n", tm_time.tm_year); 
+        printf("Month: %d\n", tm_time.tm_mon);     
+		printf("Day: %d\n", tm_time.tm_mday);          
+        printf("Second: %d\n", tm_time.tm_sec);
+
+		printf("Parsing timestamp string: %s\n", timestampStr);
+        printf("Successfully parsed.\n"); */
+
+        // 使用 mktime 函数将 tm 结构体转换为 time_t 类型的时间戳
+        return mktime(&tm_time);
     }
+    else
+    {
+        printf("Parsing timestamp string: %s\n", timestampStr);
+        printf("Failed to parse.\n");
+        return 0; // 解析失败时返回 0
+    }
+}
 
+// 根据设备名获取设备ID
+int getDeviceID(sqlite3* db, const char* deviceName) {
     int deviceID = -1; // 默认设备ID为-1，表示未找到
 
     char sql[256];
     snprintf(sql, sizeof(sql), "SELECT DeviceID FROM Device WHERE DeviceName = '%s';", deviceName);
+    //printf("SQL query: %s\n", sql); // 输出SQL查询语句
 
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (rc == SQLITE_OK && sqlite3_step(stmt) == SQLITE_ROW) {
-        deviceID = sqlite3_column_int(stmt, 0);
+    if (rc == SQLITE_OK) {
+        //printf("sqlite3_prepare_v2 successful\n");
+
+        sqlite3_reset(stmt); // 重置语句，以便可以再次执行
+        int stepResult = sqlite3_step(stmt);
+
+        if (stepResult == SQLITE_ROW) {
+            deviceID = sqlite3_column_int(stmt, 0);
+        } else if (stepResult == SQLITE_DONE) {
+            printf("No results found.\n");
+        } else {
+            printf("sqlite3_step error: %s\n", sqlite3_errmsg(db));
+        }
+
+        sqlite3_finalize(stmt);
+    } else {
+        printf("sqlite3_prepare_v2 error: %s\n", sqlite3_errmsg(db));
     }
 
-    sqlite3_finalize(stmt);
-
-    // 关闭数据库连接
-    closeDatabase();
     return deviceID;
 }
 
-// 获取设备信息
-bool getDevice(sqlite3* db,const char* deviceName, struct Device* device) {
-    // 打开数据库连接
-    if (!openDatabase("SHomedb.db")) { 
-        printf("Failed to open database.\n");
-        return false;
-    }
 
+// 获取设备信息
+bool getDevice(sqlite3* db, const char* deviceName, struct Device* device) {
     bool success = false;
 
     char sql[256];
     snprintf(sql, sizeof(sql), "SELECT * FROM Device WHERE DeviceName = '%s';", deviceName);
-
+    //printf("SQL query: %s\n", sql); // 输出SQL查询语句
+    
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (rc == SQLITE_OK && sqlite3_step(stmt) == SQLITE_ROW) {
-        device->DeviceID = sqlite3_column_int(stmt, 0);
-        snprintf(device->DeviceName, sizeof(device->DeviceName), "%s", sqlite3_column_text(stmt, 1));
-        snprintf(device->Type, sizeof(device->Type), "%s", sqlite3_column_text(stmt, 2));
-        snprintf(device->Room, sizeof(device->Room), "%s", sqlite3_column_text(stmt, 3));
-        device->UserID = sqlite3_column_int(stmt, 4);
+    if (rc == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            device->DeviceID = sqlite3_column_int(stmt, 0);
+            snprintf(device->DeviceName, sizeof(device->DeviceName), "%s", sqlite3_column_text(stmt, 1));
+            snprintf(device->Type, sizeof(device->Type), "%s", sqlite3_column_text(stmt, 2));
+            device->UserID = sqlite3_column_int(stmt, 3);
+            success = true;
+            //printf("success\n");
+        } else {
+            printf("No results found.\n");
+        }
 
-        success = true;
+        sqlite3_finalize(stmt);
+    } else {
+        printf("sqlite3_prepare_v2 error: %s\n", sqlite3_errmsg(db));
     }
 
-    sqlite3_finalize(stmt);
-
-    // 关闭数据库连接
-    closeDatabase();
     return success;
 }
+
 
 
 

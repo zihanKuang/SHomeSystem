@@ -13,7 +13,7 @@ public:
     void sendLightCommand(const QString& deviceName, Light::LightMode mode, bool powerOn, bool scheduleOn);
 
     // 对加湿器发指令
-    void sendHumidityCommand(const QString& deviceName, double humidity, bool powerOn);
+    void sendHumidityCommand(const QString& deviceName, double humidity, bool powerOn, bool flag);
 
 };
 

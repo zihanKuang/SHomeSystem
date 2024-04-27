@@ -6,6 +6,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QJsonArray>
 
 namespace Ui {
 class WeatherWidget;

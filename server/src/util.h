@@ -54,6 +54,8 @@ double calculateHumidityTotalPower(const struct Device* humidityDevice);
 
 const char* getCurrentDate();
 
+void freeCurrentDate(char* currentDate);
+
 AirMode getAirModeFromString(const char* modeStr);
 
 const char* get_error_message(int error_code);

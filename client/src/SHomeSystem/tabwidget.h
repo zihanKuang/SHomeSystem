@@ -47,9 +47,9 @@ public slots:
 
     // 声明 sendDataToServer 函数
     void sendAirDataToServer(Device::State state, double temperature,
-                             QDateTime &timestamp, AirConditioner::AirMode mode);
-    void sendLightDataToServer(Device::State state, QDateTime &timestamp, Light::LightMode mode);
-    void sendHumidityDataToServer(Device::State state, double humidity, QDateTime &timestamp);
+                             QDateTime &timestamp, AirConditioner::AirMode mode,const QString& deviceName);
+    void sendLightDataToServer(Device::State state, QDateTime &timestamp, Light::LightMode mode,const QString& deviceName);
+    void sendHumidityDataToServer(Device::State state, double humidity, QDateTime &timestamp,const QString& deviceName);
 
     // 空调温度变设置槽函数
     void onHostAirEditEditingFinished();
@@ -77,8 +77,8 @@ public slots:
     void updateSecondAirStatusLabel();
 
     //加湿器部分槽函数
-    void updateHostHumidityStatusLabel();
-    void updateLivingHumidityStatusLabel();
+    void updateHostHumidityStatusLabel(bool);
+    void updateLivingHumidityStatusLabel(bool);
     void onHostHumidityBtnClicked();
     void onLivingHumidityBtnClicked();
     void onHostHumiditySliderChanged(int value);
@@ -87,9 +87,10 @@ public slots:
     void onLivingHumiditySpinChanged(int value);
 
     // 灯光定时时间改变槽函数
-    void onLivingLightTimerTimeChanged(const QTime &time);
-    void onHostLightTimerTimeChanged(const QTime &time);
-    void onSecondLightTimerTimeChanged(const QTime &time);
+    //删除数值设置槽函数
+    //void onLivingLightTimerTimeChanged(const QTime &time);
+    //void onHostLightTimerTimeChanged(const QTime &time);
+    //void onSecondLightTimerTimeChanged(const QTime &time);
     void updateHostLightStatusLabel();
     void updateLivingLightStatusLabel();
     void updateSecondLightStatusLabel();
@@ -99,6 +100,9 @@ public slots:
     void onHostLightButtonClicked();
     void onLivingLightButtonClicked();
     void onSecondLightButtonClicked();
+    void onHostLightTimeBtnClicked();
+    void onLivingLightTimeBtnClicked();
+    void onSecondLightTimeBtnClicked();
 
 public:
 
@@ -117,7 +121,8 @@ public:
 
     //计时器标识 到 myTimer类 map
     QMap<int, myTimer*> TimerIndex2MyTimerMap;
-    QSet<int> visSet;
+    //Device 到 计时器标识 map
+    QMap<std::string, int> Device2TimerIndexMap;
     virtual void timerEvent(QTimerEvent*);
 
 

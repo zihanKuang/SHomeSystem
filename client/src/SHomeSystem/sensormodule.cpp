@@ -41,9 +41,9 @@ void SensorModule::performAutoControl()
 
     // 加湿器自动控制逻辑示例
     if (humidity < 50) {
-        executor.sendHumidityCommand("加湿器", 60, true);
+        executor.sendHumidityCommand("加湿器", 60, true, true);
     } else if (humidity > 70) {
-        executor.sendHumidityCommand("加湿器", 40, true);
+        executor.sendHumidityCommand("加湿器", 40, true, true);
     }
 
     // 根据时间自动控制灯
@@ -64,4 +64,6 @@ double SensorModule::generateRandomDouble(double min, double max)
 {
     return (std::rand() / (double)RAND_MAX) * (max - min) + min;
 }
+
+
 

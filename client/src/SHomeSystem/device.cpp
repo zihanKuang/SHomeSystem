@@ -46,8 +46,15 @@ void AirConditioner::setTimer(int hours, int minutes, TimerType timerType) {
 }
 
 void AirConditioner::setTemperature(double temperature) {
-    this->temperature = temperature;
+    // Check if temperature is within the valid range (18 to 30 degrees)
+    if (temperature >= 18.0 && temperature <= 30.0) {
+        this->temperature = temperature; // Use the provided temperature within valid range
+    } else {
+        this->temperature = 28.0; // Set to the default value of 28 degrees
+    }
 }
+
+
 // 获取温度
 double AirConditioner::getTemperature() const {
     return temperature;

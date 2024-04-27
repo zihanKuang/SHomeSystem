@@ -8,11 +8,20 @@ JSON序列化和反序列化函数
 
 // 获取当前日期字符串，格式为 YYYY-MM-DD
 const char* getCurrentDate() {
-    static char currentDate[11]; // 10字符 + 终止符
-    time_t now = time(NULL);
-    struct tm* timeinfo = localtime(&now);
-    strftime(currentDate, sizeof(currentDate), "%Y-%m-%d", timeinfo);
+    char* currentDate = (char*)malloc(11); // 10字符 + 终止符
+    if (currentDate) {
+        time_t now = time(NULL);
+        struct tm* timeinfo = localtime(&now);
+        strftime(currentDate, 11, "%Y-%m-%d", timeinfo);
+    }
     return currentDate;
+}
+
+// 释放动态分配的日期字符串内存
+void freeCurrentDate(char* currentDate) {
+    if (currentDate) {
+        free(currentDate);
+    }
 }
 
 // 根据字符串获取空调模式枚举
@@ -48,7 +57,7 @@ AirMode getAirModeFromString(const char* modeStr) {
 //char* to_json(const User* u) {
 //	cJSON* root = cJSON_CreateObject();
 //	cJSON_AddStringToObject(root, "name", u->name);
-//	// ...
+//	// 
 //    char* json_string = cJSON_Print(root);
 //    cJSON_Delete(root);
 //    return json_string;
@@ -74,216 +83,241 @@ AirMode getAirModeFromString(const char* modeStr) {
 //  // 发送警报
 //}
 
-// 计算空调的总耗电量
-double calculateAirTotalPower(const struct Device* airDevice)
-{
-    // 假设空调的基本功率为 1000 瓦特（单位：瓦特）
-    double basePowerConsumption = 1000.0;
+// 解析时间戳字符串为 time_t
+#include <stdio.h>
+#include <time.h>
+
+/* 添加一个变量 lastStartTime 来记录最近的开始信息的时间，
+	以便计算关闭信息与最近的开始信息之间的时间间隔。
+	在循环中，首先检查是否有完整的开始信息，
+	然后计算关闭信息与最近的开始信息之间的时间间隔，
+	并根据温度和模式计算该时间段内的额外功率消耗。
+	在关闭信息后，将 recordStarted 设置为 false，
+	以停止记录，并在下一个开始信息出现时重新开始记录。 */
+	
+double calculateAirTotalPower(const struct Device* airDevice) {
+    // 假设空调的基本功率为 100 瓦特（单位：瓦特）
+    double basePowerConsumption = 500.0;
 
     // 每度温度调整耗电量（单位：瓦特小时/度）
     double powerConsumptionPerDegree = 10.0;
 
     // 不同模式下的额外耗电量（单位：瓦特小时/小时）
-	// 制冷，制热，除湿，节能，睡眠，送风
-    double extraPowerConsumption[] = { 50.0, 150.0, 200.0, 30.0, 20.0, 10.0 }; // 根据模式依次对应的耗电量
+    // 制冷，制热，除湿，节能，睡眠，送风
+    double extraPowerConsumption[] = {50.0, 150.0, 200.0, 100.0, 50.0, 50.0}; // 根据模式依次对应的耗电量
 
     // 获取一天内的设备数据
     struct DeviceData deviceDataList[100]; // 最大的设备数据条目数
     int numEntries = 0;
 
-    if (getDeviceDataWithinDay(airDevice->DeviceID, getCurrentDate(), deviceDataList, &numEntries,db))
-    {
-        double totalRunningHours = 0.0;
+    //printf("Starting calculation AirTotalPower...\n");
 
-        time_t lastBootTime = 0;
-        int hasLastBootTime = 0;
+    const char* currentDate = getCurrentDate();
+    //printf("Current Date: %s\n", currentDate);
 
-        for (int i = 0; i < numEntries; i++) {
-            time_t shutdownTime = parseTimestamp(deviceDataList[i].Timestamp);
-
-            if (deviceDataList[i].StatusValue == ON) {
-                if (!hasLastBootTime) {
-                    lastBootTime = shutdownTime;
-                    hasLastBootTime = 1;
-                }
-                else {
-                    totalRunningHours += difftime(shutdownTime, lastBootTime) / 3600.0;
-                    lastBootTime = shutdownTime;
-                }
-            }
-        }
-
-        if (hasLastBootTime) {
-
-            // 初始化空调模式
-            AirMode airMode = COOLING;
-            //AirMode airMode = getAirModeFromString(deviceDataList[0].Mode);
-
-            // 初始化用于计算总耗电量的变量
-            double totalPower = basePowerConsumption * totalRunningHours;
-
-            for (int i = 0; i < numEntries; i++) {
-
-                // 获取当前条目的模式和状态
-                AirMode currentAirMode =deviceDataList[i].Mode;
-                State currentStatusValue = deviceDataList[i].StatusValue;
-
-                // 计算时间间隔和额外耗电量
-                double elapsedTime = difftime(parseTimestamp(deviceDataList[i].Timestamp), lastBootTime) / 3600.0;
-                double extraPower = 0.0;
-                
-                // 如果当前条目的模式或状态与前一条不同，更新空调模式，并计算额外耗电量
-                if (i == 0 || currentAirMode != airMode || currentStatusValue != deviceDataList[i - 1].StatusValue) 
-                {
-                    airMode = currentAirMode;
-                    if (airMode < sizeof(extraPowerConsumption) / sizeof(extraPowerConsumption[0])) {
-                        extraPower = extraPowerConsumption[airMode] * elapsedTime;
-                    }
-                }
-                // 累加额外耗电量
-                totalPower += extraPower;
-                // 如果是最后一条数据或者设备关闭，累加总运行时间
-                if (i == numEntries - 1 || deviceDataList[i].StatusValue == OFF) {
-                    totalRunningHours += elapsedTime;
-                }
-                lastBootTime = parseTimestamp(deviceDataList[i].Timestamp);
-            }
-            
-            totalPower += powerConsumptionPerDegree;
-
-            return totalPower;
-        }
+    if (!currentDate) {
+        printf("Failed to get current date.\n");
+        return 0.0;
     }
-    return 0.0; // 无法计算耗电量
+
+    if (getDeviceDataWithinDay(db, airDevice->DeviceName, currentDate, deviceDataList, &numEntries)) {
+        //printf("Got AirTotalPower data within the day.\n");
+
+        // 定义变量以记录总功率消耗
+        double totalPower = 0.0;
+
+        // 记录第一个完整的开启时间
+        time_t firstStartTime = 0;
+
+        // 遍历设备数据列表
+        for (int i = 0; i < numEntries; ++i) {
+            // 检查是否为开启状态
+            if (deviceDataList[i].StatusValue == 1 && deviceDataList[i].Feature != 0) {
+                if (firstStartTime == 0) {
+                    firstStartTime = deviceDataList[i].Timestamp;
+                }
+            } else {
+                // 如果是关闭状态，计算时间间隔并累加到总功率中
+                if (firstStartTime != 0) {
+                    time_t endTime = deviceDataList[i].Timestamp;
+                    double durationHours = difftime(endTime, firstStartTime) / 3600.0; // 将时间差转换为小时
+                    int modeIndex = deviceDataList[i].Mode; // 获取模式索引
+                    double extraPower = extraPowerConsumption[modeIndex] * durationHours; // 计算额外耗电量
+                    totalPower += basePowerConsumption * durationHours + extraPower; // 累加到总功率中
+                    firstStartTime = 0; // 重置第一个开启时间
+                }
+            }
+        }
+
+        // 打印总功率消耗
+        printf("%s Total power consumption : %.2f Watt-hours.\n", airDevice->DeviceName, totalPower);
+
+        free((char*)currentDate); // 释放 currentDate 分配的内存
+        return totalPower;
+    } else {
+        printf("Failed to get AIR CONDITIONING data within the day.\n");
+        free((char*)currentDate); // 释放 currentDate 分配的内存
+        return 0.0;
+    }
 }
+
 
 // 计算灯的总耗电量
 double calculateLightTotalPower(const struct Device* lightDevice)
 {
-    // 初始功率消耗
-    double powerConsumption = 50.0;
+    // 假设白光模式的功率为 10 瓦特/小时（单位：瓦特/小时）
+    double whiteLightPowerPerHour = 50.0;
 
-    // 假设每小时的功率消耗
-    double whiteLightPowerPerHour = 10.0; // 单位：瓦特
-    double yellowLightPowerPerHour = 15.0; // 单位：瓦特
+    // 假设黄光模式的功率为 8 瓦特/小时（单位：瓦特/小时）
+    double yellowLightPowerPerHour = 80.0;
 
+    // 获取一天内的设备数据
     struct DeviceData deviceDataList[100]; // 最大的设备数据条目数
     int numEntries = 0;
 
-    // 从数据库中查询设备在同一天内的所有运行数据
-    if (getDeviceDataWithinDay(lightDevice->DeviceID, getCurrentDate(), deviceDataList, &numEntries,db))
+    //printf("Starting calculation LightTotalPower...\n");
+
+    const char* currentDate = getCurrentDate();
+	//printf("Current Date: %s\n", currentDate);
+	
+    if (!currentDate) {
+        printf("Failed to get current date.\n");
+        return 0.0;
+    }
+
+    if (getDeviceDataWithinDay(db, lightDevice->DeviceName, currentDate, deviceDataList, &numEntries))
     {
-        // 初始化灯的模式和时间
-        LightMode lightMode = WHITE; // 假设初始为白光模式
-        time_t lastBootTime = 0;
-        bool hasLastBootTime = false;
+        // 定义变量以记录总功率消耗
+        double totalPower = 0.0;
 
-        for (int i = 0; i < numEntries; i++)
-        {
-            time_t shutdownTime = parseTimestamp(deviceDataList[i].Timestamp);
+        // 记录第一个完整的开启时间
+        time_t firstStartTime = 0;
 
-            if (deviceDataList[i].StatusValue == ON)
-            {
-                if (!hasLastBootTime)
-                {
-                    lastBootTime = shutdownTime;
-                    hasLastBootTime = true;
+        // 遍历设备数据列表
+        for (int i = 0; i < numEntries; ++i) {
+            // 检查是否为开启状态
+            if (deviceDataList[i].StatusValue == 1) {
+                if (firstStartTime == 0) {
+                    firstStartTime = deviceDataList[i].Timestamp;
                 }
-                else
-                {
-                    double elapsedTime = difftime(shutdownTime, lastBootTime) / 3600.0;
+            } else {
+                // 如果是关闭状态，计算时间间隔并累加到总功率中
+                if (firstStartTime != 0) {
+                    time_t endTime = deviceDataList[i].Timestamp;
+                    double durationHours = difftime(endTime, firstStartTime) / 3600.0; // 将时间差转换为小时
+                    int modeIndex = deviceDataList[i].Mode; // 获取模式索引
+                    double modePowerPerHour = 0.0; // 初始化模式功率
 
-                    // 如果灯的模式发生变化，重新计算耗电量
-                    if (deviceDataList[i].Mode != lightMode)
-                    {
-                        double usageHours = elapsedTime;
-
-                        if (lightMode == WHITE) {
-                            powerConsumption += whiteLightPowerPerHour * usageHours;
-                        }
-                        else if (lightMode == YELLOW) {
-                            powerConsumption += yellowLightPowerPerHour * usageHours;
-                        }
-
+                    // 根据模式索引选择对应的功率
+                    switch (modeIndex) {
+                        case WHITE:
+                            modePowerPerHour = whiteLightPowerPerHour;
+                            break;
+                        case YELLOW:
+                            modePowerPerHour = yellowLightPowerPerHour;
+                            break;
+                        default:
+                            modePowerPerHour = 0.0; // 未知模式，功率为0
+                            break;
                     }
 
-                    lastBootTime = shutdownTime;
+                    double phasePower = modePowerPerHour * durationHours; // 计算阶段功率
+                    totalPower += phasePower; // 累加到总功率中
+                    firstStartTime = 0; // 重置第一个开启时间
                 }
             }
         }
+
+        // 打印总功率消耗
+        printf("%s Total power consumption : %.2f Watt-hours.\n", lightDevice->DeviceName, totalPower);
+
+        free((char*)currentDate); // 释放 currentDate 分配的内存
+        return totalPower;
     }
-    return powerConsumption;
+    else {
+        printf("Failed to get LightTotalPower data within the day.\n");
+        free((char*)currentDate); // 释放 currentDate 分配的内存
+        return 0.0;
+    }
 }
+
+
 
 // 计算加湿器的总耗电量
 double calculateHumidityTotalPower(const struct Device* humidityDevice)
 {
-    // 假设加湿器的基本功率为 200 瓦特（单位：瓦特）
-    double basePowerConsumption = 200.0;
+    // 假设加湿器的基本功率为 20 瓦特（单位：瓦特）
+    double basePowerConsumption = 20.0;
 
     // 假设每升水的耗电量（单位：瓦特小时/升）
-    double powerConsumptionPerLiter = 0.1;
+    double powerConsumptionPerLiter = 10;
 
+    // 获取一天内的设备数据
     struct DeviceData deviceDataList[100]; // 最大的设备数据条目数
     int numEntries = 0;
+	
+	double humidity=0;
 
-    // 从数据库中查询设备在同一天内的所有运行数据
-    if (getDeviceDataWithinDay(humidityDevice->DeviceID, getCurrentDate(), deviceDataList, &numEntries, db))
+    //printf("Starting calculation HumidityTotalPower...\n");
+
+    const char* currentDate = getCurrentDate();
+
+    if (!currentDate) {
+        printf("Failed to get current date.\n");
+        return 0.0;
+    }
+
+    // 查询一天内的设备运行数据
+    if (getDeviceDataWithinDay(db, humidityDevice->DeviceName, currentDate, deviceDataList, &numEntries))
     {
-        // 初始化总耗电量
-        double totalRunningHours = basePowerConsumption;
+        //printf("Got HumidityTotalPower data within the day.\n");
 
-        time_t lastBootTime = 0;
-        bool hasLastBootTime = false;
+        // 如果没有获取到任何设备数据，直接返回基本功率
+        if (numEntries == 0) {
+            printf("No HumidityTotalPower data found for %s on %s\n", humidityDevice->DeviceName, currentDate);
+            free((char*)currentDate); // 释放动态分配的日期字符串内存
+            return 0;
+        }
 
-        for (int i = 0; i < numEntries; i++)
-        {
-            time_t shutdownTime = parseTimestamp(deviceDataList[i].Timestamp);
+         // 定义变量以记录总功率消耗
+        double totalPower = 0.0;
 
-            // 如果设备状态为开启（ON）
-            if (deviceDataList[i].StatusValue == ON)
-            {
-                // 如果尚未记录上一次开启时间
-                if (!hasLastBootTime)
-                {
-                    lastBootTime = shutdownTime;
-                    hasLastBootTime = true;
+        // 记录第一个完整的开启时间
+        time_t firstStartTime = 0;
+
+        // 遍历设备数据列表
+        for (int i = 0; i < numEntries; ++i) {
+            // 检查是否为开启状态
+            if (deviceDataList[i].StatusValue == 1) {
+                if (firstStartTime == 0) {
+                    firstStartTime = deviceDataList[i].Timestamp;
+					humidity = deviceDataList[i].Feature; // 获取湿度数据
                 }
-                else
-                {
-                    // 计算时间间隔，以小时为单位
-                    double elapsedTime = difftime(shutdownTime, lastBootTime) / 3600.0;
-
-                    // 如果湿度设备的状态发生变化，重新计算耗电量
-                    if (deviceDataList[i].StatusValue != deviceDataList[i - 1].StatusValue)
-                    {
-                        // 计算使用时长，以小时为单位
-                        double usageHours = elapsedTime;
-                        // 获取当前设置湿度值
-                        double humidityValue = deviceDataList[i].StatusValue;
-                        // 计算每小时的耗水量
-                        double waterConsumptionPerHour = 0.1 + 0.4 * (humidityValue / 100.0);
-
-                        // 计算水消耗量和相应的电耗
-                        double waterConsumed = waterConsumptionPerHour * usageHours;
-                        double powerConsumed = waterConsumed * powerConsumptionPerLiter;
-                        // 累加到基本功率消耗
-                        basePowerConsumption += powerConsumed;
-                    }
-                    // 更新上一次开启时间
-                    lastBootTime = shutdownTime;
+            } else {
+                // 如果是关闭状态，计算时间间隔并累加到总功率中
+                if (firstStartTime != 0) {
+                    time_t endTime = deviceDataList[i].Timestamp;
+                    double durationHours = difftime(endTime, firstStartTime) / 3600.0; // 将时间差转换为小时
+                    double phasePower = basePowerConsumption * durationHours * humidity; // 计算阶段功率
+                    totalPower += phasePower; // 累加到总功率中
+                    firstStartTime = 0; // 重置第一个开启时间
                 }
             }
         }
 
-        // 计算总耗电量
-        double totalPower = basePowerConsumption * totalRunningHours;
+        // 打印总功率消耗
+        printf("%s Total power consumption : %.2f Watt-hours.\n", humidityDevice->DeviceName, totalPower);
 
+        free((char*)currentDate); // 释放动态分配的日期字符串内存
         return totalPower;
     }
-
-    return 0.0; // 无法计算耗电量
+    else {
+        printf("Failed to get HumidityTotalPower data within the day.\n");
+        free((char*)currentDate); // 释放动态分配的日期字符串内存
+        return 0.0;
+    }
 }
+
 
 const char* get_error_message(int error_code) {
     switch (error_code) {

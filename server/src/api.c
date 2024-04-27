@@ -4,6 +4,17 @@
 
 const int MAX_REQUEST_SIZE = 1024;
 
+// 处理网络连接测试请求
+void handleNetworkConnectionTest(struct MHD_Connection* connection) {
+    const char* response = "Network connection is available.\n";
+    struct MHD_Response* mhdResponse = MHD_create_response_from_buffer(strlen(response),
+        (void*)response,
+        MHD_RESPMEM_MUST_COPY); // 使用 MHD_RESPMEM_MUST_COPY 来复制响应数据
+    MHD_add_response_header(mhdResponse, "Content-Type", "text/plain");
+    MHD_queue_response(connection, MHD_HTTP_OK, mhdResponse);
+    MHD_destroy_response(mhdResponse);
+}
+
 // 验证用户身份是否合法
 bool validateUser(const char* username, const char* password)
 {
@@ -231,43 +242,34 @@ void handleWeatherRequest(struct MHD_Connection* connection) {
     cJSON_Delete(jsonResponse);
 }
 
-// 处理网络连接测试请求
-void handleNetworkConnectionTest(struct MHD_Connection* connection) {
-    const char* response = "Network connection is available.\n";
-    struct MHD_Response* mhdResponse = MHD_create_response_from_buffer(strlen(response),
-        (void*)response,
-        MHD_RESPMEM_PERSISTENT);
-    MHD_add_response_header(mhdResponse, "Content-Type", "text/plain");
-    MHD_queue_response(connection, MHD_HTTP_OK, mhdResponse);
-    MHD_destroy_response(mhdResponse);
-}
-
 // 处理空调设备日总耗电分析请求
 void analyzeDataAirTotalPower(struct MHD_Connection* connection, const char* request) 
 {
-    cJSON* jsonRequest = cJSON_Parse(request);
+    // 解析请求，获取设备名称
+    const char* deviceName = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "deviceName");
 
-    if (jsonRequest == NULL) {
-        printf("Invalid JSON request.\n");
-        return;
-    }
+    printf("deviceName: %s\n", deviceName);
 
-    cJSON* jsonDeviceName = cJSON_GetObjectItem(jsonRequest, "deviceName");
-
-    if (jsonDeviceName != NULL) {
-        const char* deviceName = jsonDeviceName->valuestring;
-
+    if (deviceName != NULL) {
         // 获取设备ID
-        int deviceID = getDeviceID(db,deviceName);
+        int deviceID = getDeviceID(db, deviceName);
+
+        printf("deviceID:%d\n",deviceID);
 
         if (deviceID != -1) {
             // 获取设备信息
             struct Device airDevice;
-            if (getDevice(db,deviceName, &airDevice)) {
-                // 打开数据库
-                if (openDatabase("SHomedb.db")) {
-                    // 计算总耗电量
+            if (getDevice(db, deviceName, &airDevice)) {
+
+                // 输出设备信息
+            printf("Device ID: %d\n", airDevice.DeviceID);
+            printf("Device Name: %s\n", airDevice.DeviceName);
+            printf("Device Type: %s\n", airDevice.Type);
+            printf("User ID: %d\n", airDevice.UserID);
+
+                // 计算总耗电量
                     double totalPower = calculateAirTotalPower(&airDevice);
+                    printf("totalPower:%f\n",totalPower);
 
                     // 构建JSON响应
                     cJSON* jsonResponse = cJSON_CreateObject();
@@ -290,13 +292,6 @@ void analyzeDataAirTotalPower(struct MHD_Connection* connection, const char* req
                     // 释放 MHD_Response 和 cJSON 对象
                     MHD_destroy_response(response);
                     cJSON_Delete(jsonResponse);
-
-                    // 关闭数据库
-                    closeDatabase();
-                }
-                else {
-                    printf("Failed to open database.\n");
-                }
             }
             else {
                 printf("Failed to retrieve device information.\n");
@@ -309,38 +304,39 @@ void analyzeDataAirTotalPower(struct MHD_Connection* connection, const char* req
     else {
         printf("Invalid request.\n");
     }
-
-    cJSON_Delete(jsonRequest);
 }
+
 
 // 处理 灯 设备 日 总耗电分析请求
 void analyzeDataLightTotalPower(struct MHD_Connection* connection, const char* request)
 {
-    // 解析请求，获取设备ID等信息，使用JSON格式
-    cJSON* jsonRequest = cJSON_Parse(request);
+    // 解析请求，获取设备名称
+    const char* deviceName = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "deviceName");
 
-    if (jsonRequest == NULL) {
-        printf("Invalid JSON request.\n");
-        return;
-    }
+    printf("deviceName: %s\n", deviceName);
 
-    cJSON* jsonDeviceName = cJSON_GetObjectItem(jsonRequest, "deviceName");
-
-    if (jsonDeviceName != NULL) 
-    {
-        const char* deviceName = jsonDeviceName->valuestring;
+    if (deviceName != NULL) {
 
         // 获取设备ID
-        int deviceID = getDeviceID(db,deviceName);
+        int deviceID = getDeviceID(db, deviceName);
+
+        printf("deviceID:%d\n",deviceID);
 
         if (deviceID != -1) {
             // 获取设备信息
             struct Device lightDevice;
+
             if (getDevice(db,deviceName, &lightDevice)) {
-                // 打开数据库
-                if (openDatabase("SHomedb.db")) {
+                
+                 // 输出设备信息
+            printf("Device ID: %d\n", lightDevice.DeviceID);
+            printf("Device Name: %s\n", lightDevice.DeviceName);
+            printf("Device Type: %s\n", lightDevice.Type);
+            printf("User ID: %d\n", lightDevice.UserID);
+
                     // 计算总耗电量
                     double totalPower = calculateLightTotalPower(&lightDevice);
+                    printf("totalPower:%f\n",totalPower);
 
                     // 构建JSON响应
                     cJSON* jsonResponse = cJSON_CreateObject();
@@ -362,9 +358,6 @@ void analyzeDataLightTotalPower(struct MHD_Connection* connection, const char* r
 
                     // 释放 MHD_Response
                     MHD_destroy_response(response);
-
-                    // 关闭数据库
-                    closeDatabase();
             }
             else {
                 printf("Failed to open database.\n");
@@ -381,84 +374,75 @@ void analyzeDataLightTotalPower(struct MHD_Connection* connection, const char* r
         // 请求中没有包含必要的信息，返回错误信息
         printf("Invalid request.\n");
         }
-    }
-
-    // 释放 JSON 对象
-     cJSON_Delete(jsonRequest);
 }
 
 
 // 处理 加湿器 设备 日 总耗电分析请求
 void analyzeDataHumidityTotalPower(struct MHD_Connection* connection, const char* request)
 {
-    // 解析请求，获取设备ID等信息
-    cJSON* jsonRequest = cJSON_Parse(request);
+    // 解析请求，获取设备名称
+    const char* deviceName = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "deviceName");
 
-    if (jsonRequest == NULL) {
-        printf("Invalid JSON request.\n");
-        return;
-    }
+    printf("deviceName: %s\n", deviceName);
 
-    cJSON* jsonDeviceName = cJSON_GetObjectItem(jsonRequest, "deviceName");
-
-    if (jsonDeviceName != NULL) 
+    if (deviceName != NULL) 
     {
-        const char* deviceName = jsonDeviceName->valuestring;
-
         // 获取设备ID
-        int deviceID = getDeviceID(db,deviceName);
+        int deviceID = getDeviceID(db, deviceName);
+        printf("deviceID:%d\n", deviceID);
 
-        if (deviceID != -1) {
+        if (deviceID != -1) 
+        {
             // 获取设备信息
             struct Device humidityDevice;
-            if (getDevice(db,deviceName, &humidityDevice)) {
-                // 打开数据库
-                if (openDatabase("SHomedb.db")) {
-                    // 计算总耗电量
-                    double totalPower = calculateHumidityTotalPower(&humidityDevice);
+            if (getDevice(db, deviceName, &humidityDevice)) 
+            {
+                // 输出设备信息
+                printf("Device ID: %d\n", humidityDevice.DeviceID);
+                printf("Device Name: %s\n", humidityDevice.DeviceName);
+                printf("Device Type: %s\n", humidityDevice.Type);
+                printf("User ID: %d\n", humidityDevice.UserID);
 
-                    // 构建JSON响应
-                    cJSON* jsonResponse = cJSON_CreateObject();
-                    cJSON_AddNumberToObject(jsonResponse, "totalPower", totalPower);
+                // 计算总耗电量
+                double totalPower = calculateHumidityTotalPower(&humidityDevice);
 
-                    // 将 JSON 响应转换为字符串
-                    char* responseStr = cJSON_Print(jsonResponse);
+                // 构建JSON响应
+                cJSON* jsonResponse = cJSON_CreateObject();
+                cJSON_AddNumberToObject(jsonResponse, "totalPower", totalPower);
 
-                    // 构建 HTTP 响应
-                    struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
-                        (void*)responseStr,
-                        MHD_RESPMEM_MUST_COPY);
+                // 将 JSON 响应转换为字符串
+                char* responseStr = cJSON_Print(jsonResponse);
 
-                    // 设置 HTTP 响应头
-                    MHD_add_response_header(response, "Content-Type", "application/json");
+                // 构建 HTTP 响应
+                struct MHD_Response* response = MHD_create_response_from_buffer(strlen(responseStr),
+                    (void*)responseStr,
+                    MHD_RESPMEM_MUST_COPY);
 
-                    // 发送 HTTP 响应给客户端
-                    MHD_queue_response(connection, MHD_HTTP_OK, response);
+                // 设置 HTTP 响应头
+                MHD_add_response_header(response, "Content-Type", "application/json");
 
-                    // 释放 MHD_Response
-                    MHD_destroy_response(response);
+                // 发送 HTTP 响应给客户端
+                MHD_queue_response(connection, MHD_HTTP_OK, response);
 
-                    // 关闭数据库
-                    closeDatabase();
-                }
-                else {
-                    printf("Failed to open database.\n");
-                }
+                // 释放 MHD_Response
+                MHD_destroy_response(response);
             }
-            else {
-                printf("Failed to retrieve device information.\n");
+            else 
+            {
+                printf("Failed to open database.\n");
             }
         }
-        else {
+        else 
+        {
             printf("Device not found.\n");
         }
     }
-    else {
+    else 
+    {
         printf("Invalid request.\n");
     }
-
-    cJSON_Delete(jsonRequest);
 }
+
 
 // // 处理设备日使用时长分析请求
 // void analyzeDataTime(struct MHD_Connection* connection, const char* request)
@@ -524,14 +508,15 @@ void updateAirDeviceStatus(struct MHD_Connection* connection, const char* reques
     printf("timeParam: %s\n", timeParam);
 
     if (deviceNameParam && statusValueParam && modeParam && featureParam) {
-        int deviceID = atoi(deviceIDParam);
+        const char* deviceName = deviceNameParam;
         int statusValue = atoi(statusValueParam);
         int mode = atoi(modeParam);
-        double feature = atof(featureParam); // 温度
+        double feature = atof(featureParam);
+        const char* timestamp = timeParam;
 
         // 使用 SQLite 更新语句将数据更新到数据库
         char sql[256];
-        snprintf(sql, sizeof(sql), "UPDATE DeviceData SET StatusValue = %d, Mode = %d, Feature = %lf WHERE DeviceID = %d;", statusValue, mode, feature, deviceID);
+        snprintf(sql, sizeof(sql), "INSERT INTO DeviceData (DeviceName, Timestamp, StatusValue, Mode, Feature) VALUES ('%s', '%s', %d, %d, %lf);", deviceName, timestamp, statusValue, mode, feature);
         printf("Generated SQL query: %s\n", sql);
 
         // 执行更新语句
@@ -595,22 +580,26 @@ void updateAirDeviceStatus(struct MHD_Connection* connection, const char* reques
 void updateLightDeviceStatus(struct MHD_Connection* connection, const char* request, sqlite3* db)
 {
     // 解析请求，获取设备信息
-    cJSON* jsonRequest = cJSON_Parse(request);
-    cJSON* jsonDeviceID;
-    cJSON* jsonStatusValue;
-    cJSON* jsonMode;
+    const char* deviceNameParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "deviceName");
+    const char* statusValueParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "statusValue");
+    const char* modeParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "mode");
+    const char* timeParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "timestamp");
 
-    if ((jsonDeviceID = cJSON_GetObjectItem(jsonRequest, "deviceID")) &&
-        (jsonStatusValue = cJSON_GetObjectItem(jsonRequest, "statusValue")) &&
-        (jsonMode = cJSON_GetObjectItem(jsonRequest, "mode")))
-    {
-        int deviceID = cJSON_GetNumberValue(jsonDeviceID);
-        int statusValue = cJSON_GetNumberValue(jsonStatusValue);
-        int mode = cJSON_GetNumberValue(jsonMode);
+    printf("deviceNameParam: %s\n", deviceNameParam);
+    printf("statusValueParam: %s\n", statusValueParam);
+    printf("modeParam: %s\n", modeParam);
+    printf("timeParam: %s\n", timeParam);
+
+   if (deviceNameParam && statusValueParam && modeParam) {
+        const char* deviceName = deviceNameParam;
+        int statusValue = atoi(statusValueParam);
+        int mode = atoi(modeParam);
+        const char* timestamp = timeParam;
 
         // 使用 SQLite 更新语句将数据更新到数据库
         char sql[256];
-        snprintf(sql, sizeof(sql), "UPDATE DeviceData SET StatusValue = %d, Mode = %d WHERE DeviceID = %d;", statusValue, mode, deviceID);
+        snprintf(sql, sizeof(sql), "INSERT INTO DeviceData (DeviceName, Timestamp, StatusValue, Mode) VALUES ('%s', '%s', %d, %d);", deviceName, timestamp, statusValue, mode);
+        printf("Generated SQL query: %s\n", sql);
 
          // 执行更新语句
         char* errmsg = NULL;
@@ -671,35 +660,32 @@ void updateLightDeviceStatus(struct MHD_Connection* connection, const char* requ
 
         cJSON_Delete(jsonResponse);
     }
-
-    cJSON_Delete(jsonRequest);
 }
 
 // 更新加湿器设备信息到数据库
 void updateHumidityDeviceStatus(struct MHD_Connection* connection, const char* request, sqlite3* db)
 {
     // 解析请求，获取设备信息
-    cJSON* jsonRequest = cJSON_Parse(request);
-    cJSON* jsonDeviceID;
-    cJSON* jsonStatusValue;
-    cJSON* jsonFeature;
+    const char* deviceNameParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "deviceName");
+    const char* statusValueParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "statusValue");
+    const char* featureParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "feature");
+    const char* timeParam = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "timestamp");
 
-    if (jsonRequest &&
-        cJSON_HasObjectItem(jsonRequest, "deviceID") &&
-        cJSON_HasObjectItem(jsonRequest, "statusValue") &&
-        cJSON_HasObjectItem(jsonRequest, "feature"))
-    {
-        jsonDeviceID = cJSON_GetObjectItem(jsonRequest, "deviceID");
-        jsonStatusValue = cJSON_GetObjectItem(jsonRequest, "statusValue");
-        jsonFeature = cJSON_GetObjectItem(jsonRequest, "feature");
+    printf("deviceNameParam: %s\n", deviceNameParam);
+    printf("statusValueParam: %s\n", statusValueParam);
+    printf("featureParam: %s\n", featureParam);
+    printf("timeParam: %s\n", timeParam);
 
-        int deviceID = jsonDeviceID->valueint;
-        int statusValue = jsonStatusValue->valueint;
-        double feature = jsonFeature->valuedouble; // 湿度
+    if (deviceNameParam && statusValueParam && featureParam) {
+        const char* deviceName = deviceNameParam;
+        int statusValue = atoi(statusValueParam);
+        double feature = atof(featureParam);
+        const char* timestamp = timeParam;
 
         // 使用 SQLite 更新语句将数据更新到数据库
         char sql[256];
-        snprintf(sql, sizeof(sql), "UPDATE DeviceData SET StatusValue = %d, Feature = %lf WHERE DeviceID = %d;", statusValue, feature, deviceID);
+        snprintf(sql, sizeof(sql), "INSERT INTO DeviceData (DeviceName, Timestamp, StatusValue, Mode, Feature) VALUES ('%s', '%s', %d, %d, %lf);", deviceName, timestamp, statusValue, 0, feature);
+        printf("Generated SQL query: %s\n", sql);
 
         // 执行更新语句
         char* errmsg = NULL;
@@ -761,7 +747,6 @@ void updateHumidityDeviceStatus(struct MHD_Connection* connection, const char* r
         cJSON_Delete(jsonResponse);
     }
 
-    cJSON_Delete(jsonRequest);
 }
 
 

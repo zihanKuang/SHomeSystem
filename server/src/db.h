@@ -16,13 +16,12 @@ struct Device {
     int DeviceID;
     char DeviceName[255];
     char Type[255];
-    char Room[255];
     int UserID; // Foreign key reference to UserData
 };
 
 struct DeviceData {
     int DataID;
-    int DeviceID;
+    char DeviceName[255];
     char Timestamp[20];
     int StatusValue;
     int Mode;   // 枚举类：模式
@@ -66,9 +65,9 @@ bool getUserData(sqlite3* db, const char* username, char* password);
 bool getDeviceData(sqlite3* db, int deviceID, struct DeviceData* deviceData);
 
 // 从数据库中获取设备在同一天内的所有运行数据
-int getDeviceDataWithinDay(sqlite3* db, int deviceID, const char* timestamp, struct DeviceData deviceDataList[], int* numEntries);
+int getDeviceDataWithinDay(sqlite3* db, const char* deviceName, const char* timestamp, struct DeviceData deviceDataList[], int* numEntries);
 
-time_t parseTimestamp(const char* timestampStr);
+time_t parseTimestamppp(const char* timestampStr);
 time_t getLastBootTime(sqlite3* db, int deviceID);
 // 根据设备名获取设备ID
 int getDeviceID(sqlite3* db, const char* deviceName);

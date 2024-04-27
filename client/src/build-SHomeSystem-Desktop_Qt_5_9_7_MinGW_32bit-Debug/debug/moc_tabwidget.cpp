@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_TabWidget_t {
-    QByteArrayData data[59];
-    char stringdata0[1274];
+    QByteArrayData data[58];
+    char stringdata0[1263];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -77,19 +77,18 @@ QT_MOC_LITERAL(42, 854, 5), // "value"
 QT_MOC_LITERAL(43, 860, 29), // "onLivingHumiditySliderChanged"
 QT_MOC_LITERAL(44, 890, 25), // "onHostHumiditySpinChanged"
 QT_MOC_LITERAL(45, 916, 27), // "onLivingHumiditySpinChanged"
-QT_MOC_LITERAL(46, 944, 29), // "onLivingLightTimerTimeChanged"
-QT_MOC_LITERAL(47, 974, 4), // "time"
-QT_MOC_LITERAL(48, 979, 27), // "onHostLightTimerTimeChanged"
-QT_MOC_LITERAL(49, 1007, 29), // "onSecondLightTimerTimeChanged"
-QT_MOC_LITERAL(50, 1037, 26), // "updateHostLightStatusLabel"
-QT_MOC_LITERAL(51, 1064, 28), // "updateLivingLightStatusLabel"
-QT_MOC_LITERAL(52, 1093, 28), // "updateSecondLightStatusLabel"
-QT_MOC_LITERAL(53, 1122, 22), // "onHostLightModeChanged"
-QT_MOC_LITERAL(54, 1145, 24), // "onLivingLightModeChanged"
-QT_MOC_LITERAL(55, 1170, 24), // "onSecondLightModeChanged"
-QT_MOC_LITERAL(56, 1195, 24), // "onHostLightButtonClicked"
-QT_MOC_LITERAL(57, 1220, 26), // "onLivingLightButtonClicked"
-QT_MOC_LITERAL(58, 1247, 26) // "onSecondLightButtonClicked"
+QT_MOC_LITERAL(46, 944, 26), // "updateHostLightStatusLabel"
+QT_MOC_LITERAL(47, 971, 28), // "updateLivingLightStatusLabel"
+QT_MOC_LITERAL(48, 1000, 28), // "updateSecondLightStatusLabel"
+QT_MOC_LITERAL(49, 1029, 22), // "onHostLightModeChanged"
+QT_MOC_LITERAL(50, 1052, 24), // "onLivingLightModeChanged"
+QT_MOC_LITERAL(51, 1077, 24), // "onSecondLightModeChanged"
+QT_MOC_LITERAL(52, 1102, 24), // "onHostLightButtonClicked"
+QT_MOC_LITERAL(53, 1127, 26), // "onLivingLightButtonClicked"
+QT_MOC_LITERAL(54, 1154, 26), // "onSecondLightButtonClicked"
+QT_MOC_LITERAL(55, 1181, 25), // "onHostLightTimeBtnClicked"
+QT_MOC_LITERAL(56, 1207, 27), // "onLivingLightTimeBtnClicked"
+QT_MOC_LITERAL(57, 1235, 27) // "onSecondLightTimeBtnClicked"
 
     },
     "TabWidget\0dataReceived\0\0deviceName\0"
@@ -122,9 +121,6 @@ QT_MOC_LITERAL(58, 1247, 26) // "onSecondLightButtonClicked"
     "onLivingHumiditySliderChanged\0"
     "onHostHumiditySpinChanged\0"
     "onLivingHumiditySpinChanged\0"
-    "onLivingLightTimerTimeChanged\0time\0"
-    "onHostLightTimerTimeChanged\0"
-    "onSecondLightTimerTimeChanged\0"
     "updateHostLightStatusLabel\0"
     "updateLivingLightStatusLabel\0"
     "updateSecondLightStatusLabel\0"
@@ -132,7 +128,10 @@ QT_MOC_LITERAL(58, 1247, 26) // "onSecondLightButtonClicked"
     "onSecondLightModeChanged\0"
     "onHostLightButtonClicked\0"
     "onLivingLightButtonClicked\0"
-    "onSecondLightButtonClicked"
+    "onSecondLightButtonClicked\0"
+    "onHostLightTimeBtnClicked\0"
+    "onLivingLightTimeBtnClicked\0"
+    "onSecondLightTimeBtnClicked"
 };
 #undef QT_MOC_LITERAL
 
@@ -156,44 +155,44 @@ static const uint qt_meta_data_TabWidget[] = {
        5,    0,  229,    2, 0x0a /* Public */,
        6,    1,  230,    2, 0x0a /* Public */,
        7,    2,  233,    2, 0x0a /* Public */,
-       9,    4,  238,    2, 0x0a /* Public */,
-      17,    3,  247,    2, 0x0a /* Public */,
-      19,    3,  254,    2, 0x0a /* Public */,
-      21,    0,  261,    2, 0x0a /* Public */,
-      22,    0,  262,    2, 0x0a /* Public */,
-      23,    0,  263,    2, 0x0a /* Public */,
-      24,    0,  264,    2, 0x0a /* Public */,
-      25,    0,  265,    2, 0x0a /* Public */,
-      26,    0,  266,    2, 0x0a /* Public */,
-      27,    0,  267,    2, 0x0a /* Public */,
-      28,    0,  268,    2, 0x0a /* Public */,
-      29,    0,  269,    2, 0x0a /* Public */,
-      30,    1,  270,    2, 0x0a /* Public */,
-      32,    1,  273,    2, 0x0a /* Public */,
-      33,    1,  276,    2, 0x0a /* Public */,
-      34,    0,  279,    2, 0x0a /* Public */,
-      35,    0,  280,    2, 0x0a /* Public */,
-      36,    0,  281,    2, 0x0a /* Public */,
-      37,    0,  282,    2, 0x0a /* Public */,
-      38,    0,  283,    2, 0x0a /* Public */,
-      39,    0,  284,    2, 0x0a /* Public */,
-      40,    0,  285,    2, 0x0a /* Public */,
-      41,    1,  286,    2, 0x0a /* Public */,
-      43,    1,  289,    2, 0x0a /* Public */,
-      44,    1,  292,    2, 0x0a /* Public */,
-      45,    1,  295,    2, 0x0a /* Public */,
-      46,    1,  298,    2, 0x0a /* Public */,
-      48,    1,  301,    2, 0x0a /* Public */,
-      49,    1,  304,    2, 0x0a /* Public */,
-      50,    0,  307,    2, 0x0a /* Public */,
-      51,    0,  308,    2, 0x0a /* Public */,
-      52,    0,  309,    2, 0x0a /* Public */,
-      53,    1,  310,    2, 0x0a /* Public */,
-      54,    1,  313,    2, 0x0a /* Public */,
-      55,    1,  316,    2, 0x0a /* Public */,
-      56,    0,  319,    2, 0x0a /* Public */,
-      57,    0,  320,    2, 0x0a /* Public */,
-      58,    0,  321,    2, 0x0a /* Public */,
+       9,    5,  238,    2, 0x0a /* Public */,
+      17,    4,  249,    2, 0x0a /* Public */,
+      19,    4,  258,    2, 0x0a /* Public */,
+      21,    0,  267,    2, 0x0a /* Public */,
+      22,    0,  268,    2, 0x0a /* Public */,
+      23,    0,  269,    2, 0x0a /* Public */,
+      24,    0,  270,    2, 0x0a /* Public */,
+      25,    0,  271,    2, 0x0a /* Public */,
+      26,    0,  272,    2, 0x0a /* Public */,
+      27,    0,  273,    2, 0x0a /* Public */,
+      28,    0,  274,    2, 0x0a /* Public */,
+      29,    0,  275,    2, 0x0a /* Public */,
+      30,    1,  276,    2, 0x0a /* Public */,
+      32,    1,  279,    2, 0x0a /* Public */,
+      33,    1,  282,    2, 0x0a /* Public */,
+      34,    0,  285,    2, 0x0a /* Public */,
+      35,    0,  286,    2, 0x0a /* Public */,
+      36,    0,  287,    2, 0x0a /* Public */,
+      37,    1,  288,    2, 0x0a /* Public */,
+      38,    1,  291,    2, 0x0a /* Public */,
+      39,    0,  294,    2, 0x0a /* Public */,
+      40,    0,  295,    2, 0x0a /* Public */,
+      41,    1,  296,    2, 0x0a /* Public */,
+      43,    1,  299,    2, 0x0a /* Public */,
+      44,    1,  302,    2, 0x0a /* Public */,
+      45,    1,  305,    2, 0x0a /* Public */,
+      46,    0,  308,    2, 0x0a /* Public */,
+      47,    0,  309,    2, 0x0a /* Public */,
+      48,    0,  310,    2, 0x0a /* Public */,
+      49,    1,  311,    2, 0x0a /* Public */,
+      50,    1,  314,    2, 0x0a /* Public */,
+      51,    1,  317,    2, 0x0a /* Public */,
+      52,    0,  320,    2, 0x0a /* Public */,
+      53,    0,  321,    2, 0x0a /* Public */,
+      54,    0,  322,    2, 0x0a /* Public */,
+      55,    0,  323,    2, 0x0a /* Public */,
+      56,    0,  324,    2, 0x0a /* Public */,
+      57,    0,  325,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QString, QMetaType::Double,    3,    4,
@@ -202,9 +201,9 @@ static const uint qt_meta_data_TabWidget[] = {
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,    2,
     QMetaType::Void, QMetaType::QString, QMetaType::QString,    8,    3,
-    QMetaType::Void, 0x80000000 | 10, QMetaType::Double, 0x80000000 | 13, 0x80000000 | 15,   11,   12,   14,   16,
-    QMetaType::Void, 0x80000000 | 10, 0x80000000 | 13, 0x80000000 | 18,   11,   14,   16,
-    QMetaType::Void, 0x80000000 | 10, QMetaType::Double, 0x80000000 | 13,   11,   20,   14,
+    QMetaType::Void, 0x80000000 | 10, QMetaType::Double, 0x80000000 | 13, 0x80000000 | 15, QMetaType::QString,   11,   12,   14,   16,    3,
+    QMetaType::Void, 0x80000000 | 10, 0x80000000 | 13, 0x80000000 | 18, QMetaType::QString,   11,   14,   16,    3,
+    QMetaType::Void, 0x80000000 | 10, QMetaType::Double, 0x80000000 | 13, QMetaType::QString,   11,   20,   14,    3,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -220,23 +219,23 @@ static const uint qt_meta_data_TabWidget[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Bool,    2,
+    QMetaType::Void, QMetaType::Bool,    2,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,   42,
     QMetaType::Void, QMetaType::Int,   42,
     QMetaType::Void, QMetaType::Int,   42,
     QMetaType::Void, QMetaType::Int,   42,
-    QMetaType::Void, QMetaType::QTime,   47,
-    QMetaType::Void, QMetaType::QTime,   47,
-    QMetaType::Void, QMetaType::QTime,   47,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,   31,
     QMetaType::Void, QMetaType::Int,   31,
     QMetaType::Void, QMetaType::Int,   31,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -254,9 +253,9 @@ void TabWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 1: _t->onServerConnectionFinished(); break;
         case 2: _t->handleTabChange((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 3: _t->sendDeviceTotalPowerRequest((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2]))); break;
-        case 4: _t->sendAirDataToServer((*reinterpret_cast< Device::State(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< QDateTime(*)>(_a[3])),(*reinterpret_cast< AirConditioner::AirMode(*)>(_a[4]))); break;
-        case 5: _t->sendLightDataToServer((*reinterpret_cast< Device::State(*)>(_a[1])),(*reinterpret_cast< QDateTime(*)>(_a[2])),(*reinterpret_cast< Light::LightMode(*)>(_a[3]))); break;
-        case 6: _t->sendHumidityDataToServer((*reinterpret_cast< Device::State(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< QDateTime(*)>(_a[3]))); break;
+        case 4: _t->sendAirDataToServer((*reinterpret_cast< Device::State(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< QDateTime(*)>(_a[3])),(*reinterpret_cast< AirConditioner::AirMode(*)>(_a[4])),(*reinterpret_cast< const QString(*)>(_a[5]))); break;
+        case 5: _t->sendLightDataToServer((*reinterpret_cast< Device::State(*)>(_a[1])),(*reinterpret_cast< QDateTime(*)>(_a[2])),(*reinterpret_cast< Light::LightMode(*)>(_a[3])),(*reinterpret_cast< const QString(*)>(_a[4]))); break;
+        case 6: _t->sendHumidityDataToServer((*reinterpret_cast< Device::State(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< QDateTime(*)>(_a[3])),(*reinterpret_cast< const QString(*)>(_a[4]))); break;
         case 7: _t->onHostAirEditEditingFinished(); break;
         case 8: _t->onLivingAirEditEditingFinished(); break;
         case 9: _t->onSecondAirEditEditingFinished(); break;
@@ -272,26 +271,26 @@ void TabWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 19: _t->updateHostAirStatusLabel(); break;
         case 20: _t->updateLivingAirStatusLabel(); break;
         case 21: _t->updateSecondAirStatusLabel(); break;
-        case 22: _t->updateHostHumidityStatusLabel(); break;
-        case 23: _t->updateLivingHumidityStatusLabel(); break;
+        case 22: _t->updateHostHumidityStatusLabel((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 23: _t->updateLivingHumidityStatusLabel((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 24: _t->onHostHumidityBtnClicked(); break;
         case 25: _t->onLivingHumidityBtnClicked(); break;
         case 26: _t->onHostHumiditySliderChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 27: _t->onLivingHumiditySliderChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 28: _t->onHostHumiditySpinChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 29: _t->onLivingHumiditySpinChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 30: _t->onLivingLightTimerTimeChanged((*reinterpret_cast< const QTime(*)>(_a[1]))); break;
-        case 31: _t->onHostLightTimerTimeChanged((*reinterpret_cast< const QTime(*)>(_a[1]))); break;
-        case 32: _t->onSecondLightTimerTimeChanged((*reinterpret_cast< const QTime(*)>(_a[1]))); break;
-        case 33: _t->updateHostLightStatusLabel(); break;
-        case 34: _t->updateLivingLightStatusLabel(); break;
-        case 35: _t->updateSecondLightStatusLabel(); break;
-        case 36: _t->onHostLightModeChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 37: _t->onLivingLightModeChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 38: _t->onSecondLightModeChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 39: _t->onHostLightButtonClicked(); break;
-        case 40: _t->onLivingLightButtonClicked(); break;
-        case 41: _t->onSecondLightButtonClicked(); break;
+        case 30: _t->updateHostLightStatusLabel(); break;
+        case 31: _t->updateLivingLightStatusLabel(); break;
+        case 32: _t->updateSecondLightStatusLabel(); break;
+        case 33: _t->onHostLightModeChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 34: _t->onLivingLightModeChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 35: _t->onSecondLightModeChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 36: _t->onHostLightButtonClicked(); break;
+        case 37: _t->onLivingLightButtonClicked(); break;
+        case 38: _t->onSecondLightButtonClicked(); break;
+        case 39: _t->onHostLightTimeBtnClicked(); break;
+        case 40: _t->onLivingLightTimeBtnClicked(); break;
+        case 41: _t->onSecondLightTimeBtnClicked(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
